@@ -11,15 +11,14 @@ import facsimile.fermi as fermi
 # FRAMEWORK FUNCTIONS
 #######################################################
 
-
-#
-# this function is the "inverse" of factorization
-# it takes as inputs the 2 factors space and dynamics
-# and outputs the SIR model
-# in ODE form
-#
-
 def distribute_to_ode(space,dynamics):
+    """
+    This functionn is the "inverse" of factorization. It takes as inputs the 2 factors, space and dynamics, and
+    outputs the SIR model in ODE form.
+    :param space:
+    :param dynamics:
+    :return:
+    """
     indexvalues = space[0][0]['values']
 
     advoper = space[1]
@@ -34,11 +33,16 @@ def distribute_to_ode(space,dynamics):
     vdyn = list(map(lambda l,indexvalues=indexvalues : lambda t,y :  dyn(t,y,l),indexvalues))
     vout=lambda t,y,redfun=redfun,vdyn=vdyn :  [sum(a) for a in zip(F.reduce(redfun,vdyn)(t,y) ,  applyadv(advoper,var,indexvalues)(y))]
     return vout
-#
-# This is an utility function to apply the advection operator to the whole model
-# it's called by distribute only
 
 def applyadv(advoper, var, indexvalues):
+    """
+    This is an utility function to apply the advection operator to the whole model.
+    It's called by distribute only.
+    :param advoper:
+    :param var:
+    :param indexvalues:
+    :return:
+    """
     aff=list()
     for i in range(len(indexvalues)):
         for j in range(len(var)):
@@ -88,7 +92,17 @@ def bvp(modelprocesses):
 
 
 class React(gillespy2.Model):
+
     def __init__(self, modelprocesses,modelspace,modelvariables,initvalue,advrate,parameter_query=None):
+        """
+
+        :param modelprocesses:
+        :param modelspace:
+        :param modelvariables:
+        :param initvalue:
+        :param advrate:
+        :param parameter_query:
+        """
         gillespy2.Model.__init__(self, name='Gillespie')
 
         #
@@ -151,6 +165,10 @@ class React(gillespy2.Model):
 
 
 def makeSDgraph():
+    """
+
+    :return:
+    """
     with open('testSD.dot','w') as f:
         f.write('digraph test { \n')
         f.write('rankdir=TP \n')
