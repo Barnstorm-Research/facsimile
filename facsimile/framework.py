@@ -3,7 +3,7 @@ import scipy.integrate as SI
 import numpy as N
 import pylab as P
 import gillespy2
-import fermi as fermi
+import facsimile.fermi as fermi
 
 
 
