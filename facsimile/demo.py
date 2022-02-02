@@ -2,11 +2,15 @@ import scipy.integrate as SI
 import numpy as N
 import pylab as P
 import gillespy2
-import SIRexample as S
-import facsimile as F
+import facsimile.SIRexample as S
+import facsimile.framework as F
 
 
 def simul():
+    """
+
+    :return:
+    """
     # model assembly
     modelspace = S.modelspace()
     travel=S.travel
@@ -98,6 +102,10 @@ def simul():
     return model,tv,yv
 
 def assembleg():
+    """
+
+    :return:
+    """
     advrate=1e-4
     modelprocesses=[p['implementation'] for p in S.getprocessimplementation('Gillespie')]
     model = F.React(modelprocesses,S.modelspace,S.modelvariables,S.initvalue,advrate,parameter_query='infrecrates')
@@ -110,11 +118,20 @@ def assembleg():
 
 
 
-def runboth():
+def runboth(figuresBlock=True):
+    """
+
+    :param figuresBlock: If true, then the plots block the function
+    :return:
+    """
     P.close('all')
     simul()
     fsize=P.gcf().get_size_inches()
     assembleg()
     P.gcf().set_size_inches(fsize)
-    P.show(block=False)
+    P.show(block=figuresBlock)
 
+if __name__ == "__main__":
+    print("facsimile demo. Running both simulations:")
+    runboth(figuresBlock=True)
+    print("Good-bye")
