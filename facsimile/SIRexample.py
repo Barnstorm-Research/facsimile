@@ -1,4 +1,6 @@
 import functools as F
+from typing import List
+
 import scipy.integrate as SI
 import numpy as N
 import pylab as P
@@ -69,30 +71,50 @@ def getprocessimplementation(moc):
             mp['indices']=['Region']
             mps.append(mp)
         return mps
-        
-    
-# Reference Implementations
+
+
 def infection(t,y,params=[1e-2,1e-3,1e-3]):
+    """
+    Reference implementation for implementation
+    :param t:
+    :param y:
+    :param params:
+    :return:
+    """
     beta = params[0]
     flow=y[0]*y[1]*beta
     return [-flow,flow,0.0]
 
 def recovery(t,y,params=[1e-2,1e-3,1e-3]):
+    """
+    Reference implementation for recovery
+    :param t:
+    :param y:
+    :param params:
+    :return:
+    """
     rho=params[1]
     flow = y[1]*rho
     return [0.0, -flow,flow]
 
 def reinfection(t,y,params=[1e-2,1e-3,1e-3]):
+    """
+    Reference implementation for reinfection
+    :param t:
+    :param y:
+    :param params:
+    :return:
+    """
     beta = params[2]
     flow=y[1]*y[2]*beta
     return [0.0,flow,-flow]
 
 
-
-#
-# This is the geometry or index space
-#
 def modelspace():
+    """
+    Creates the geometry, index space
+    :return:
+    """
     msp=list()
     ms=dict()
     ms['name']='Region'
@@ -109,8 +131,12 @@ def modelspace():
 #
 
 def travel(x,y):
-    # x: population in zone of interest
-    # y: vector of population in all zones
+    """
+    Advection operator.
+    :param x: population in zone of interest
+    :param y: vector of population in all zones
+    :return:
+    """
     # Fraction of Population traveling out of zone a and
     # into zone b per unit time
     ff = 1e-4  
@@ -148,13 +174,16 @@ def modelprocessesG():
 # Translation of reference implementation
 
 def infectionG(y,params):
-    '''
+    """
     Reference:
     def infection(t,y,params=[1e-2,1e-3,1e-3]):
        beta = params[0]
        flow=y[0]*y[1]*beta
        return [-flow,flow,0.0]
-    '''
+    :param y:
+    :param params:
+    :return:
+    """
     beta=params[0]
     react=dict()
     react['name']='Infection'
@@ -163,13 +192,16 @@ def infectionG(y,params):
     react['products']={y[1]:2}
     return react
 def recoveryG(y,params):
-    '''
+    """
     Reference:
     def recovery(t,y,params=[1e-2,1e-3,1e-3]):
     rho=params[1]
     flow = y[1]*rho
     return [0.0, -flow,flow]
-    '''
+    :param y:
+    :param params:
+    :return:
+    """
     rho=params[1]
     react=dict()
     react['name']='Recovery'
@@ -179,13 +211,16 @@ def recoveryG(y,params):
     return react
 
 def reinfectionG(y,params):
-    '''
+    """
     Reference:
     def reinfection(t,y,params=[1e-2,1e-3,1e-3]):
         beta = params[2]
         flow=y[1]*y[2]*beta
         return [0.0,flow,-flow]
-    '''
+    :param y:
+    :param params:
+    :return:
+    """
     beta = params[2]
     react=dict()
     react['name']='Reinfection'
@@ -193,6 +228,3 @@ def reinfectionG(y,params):
     react['reactants']={y[1]:1,y[2]:1}
     react['products']={y[1]:2}
     return react
-
-
-
