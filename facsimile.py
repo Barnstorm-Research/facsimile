@@ -88,7 +88,7 @@ def bvp(modelprocesses):
 
 
 class React(gillespy2.Model):
-    def __init__(self, modelprocesses,modelspace,modelvariables,initvalue,parameter_query=None):
+    def __init__(self, modelprocesses,modelspace,modelvariables,initvalue,advrate,parameter_query=None):
         gillespy2.Model.__init__(self, name='Gillespie')
 
         #
@@ -97,14 +97,14 @@ class React(gillespy2.Model):
         paramd=dict()
         for r in modelspace()[0]['values']:
             parameters = list()
-            irate,rrate,rirate= fermi.fermi(parameter_query,r)
-            parameters.append(gillespy2.Parameter(name='k_c'+r, expression=irate))
-            parameters.append(gillespy2.Parameter(name='k_d'+r, expression=rrate))
-            parameters.append(gillespy2.Parameter(name='k_di'+r, expression=rirate))
+            prates= fermi.fermi(parameter_query,r)
+            for i in range(len(prates)):
+                parameters.append(gillespy2.Parameter(
+                    name='k_c'+str(i)+r, expression=prates[i]))
             self.add_parameter(parameters)
             paramd[r]=parameters
             
-        k_travel=gillespy2.Parameter(name='k_travel', expression=1e-4)
+        k_travel=gillespy2.Parameter(name='k_travel', expression=advrate)
         self.add_parameter(k_travel)
         
         #

@@ -14,8 +14,8 @@ def fermi(query,indexvalue):
 
 def infrecrate(zone):
     if zone == 'Metroton':
-        return 1e-4,1e-2,1e-5
+        return [1e-4,1e-2,1e-5]
     elif zone == 'Suburbium':
-        return 1e-3,1e-2,1e-4
+        return [1e-3,1e-2,1e-4]
     else:
-        return 1e-4,1e-2,1e-5
+        return [1e-4,1e-2,1e-5]

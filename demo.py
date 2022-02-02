@@ -62,7 +62,7 @@ def simul():
     # plot results
     P.figure()
     regions=space[0][0]['values']
-    print(regions)
+
     for j in range(len(regions)):
         #P.figure()
         for i in range(len(dynamics[0])):
@@ -98,7 +98,8 @@ def simul():
     return model,tv,yv
 
 def assembleg():
-    model = F.React(S.modelprocessesG,S.modelspace,S.modelvariables,S.initvalue,parameter_query='infrecrates')
+    advrate=1e-4
+    model = F.React(S.modelprocessesG,S.modelspace,S.modelvariables,S.initvalue,advrate,parameter_query='infrecrates')
     results = model.run(number_of_trajectories=10)
     results.plot()
     P.grid()
