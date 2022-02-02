@@ -3,6 +3,8 @@ import scipy.integrate as SI
 import numpy as N
 import pylab as P
 import gillespy2
+import fermi as fermi
+
 
 
 #######################################################
@@ -24,7 +26,7 @@ def distribute_to_ode(space,dynamics):
     var = [vv['name'] for vv in dynamics[0]]
 
     dynv= [p['implementation'] for p in dynamics[1]]
-    paramf=lambda indexv : fermi(dynamics[2],indexv)
+    paramf=lambda indexv : fermi.fermi(dynamics[2],indexv)
     mapfun = lambda l : lambda t,y :  dyn(t,y,l)
     redfun=lambda f1,f2: lambda t,x : f1(t,x[:-len(var)])+f2(t,x[-len(var):])
 
@@ -85,9 +87,9 @@ def bvp(modelprocesses):
 
 
 
-class SIR(gillespy2.Model):
-    def __init__(self, modelprocesses,modelspace,parameter_values=None):
-        gillespy2.Model.__init__(self, name='SIR')
+class React(gillespy2.Model):
+    def __init__(self, modelprocesses,modelspace,modelvariables,initvalue,parameter_query=None):
+        gillespy2.Model.__init__(self, name='Gillespie')
 
         #
         # Parameters from FERMI
@@ -95,7 +97,7 @@ class SIR(gillespy2.Model):
         paramd=dict()
         for r in modelspace()[0]['values']:
             parameters = list()
-            irate,rrate,rirate=infrecrate(r)
+            irate,rrate,rirate= fermi.fermi(parameter_query,r)
             parameters.append(gillespy2.Parameter(name='k_c'+r, expression=irate))
             parameters.append(gillespy2.Parameter(name='k_d'+r, expression=rrate))
             parameters.append(gillespy2.Parameter(name='k_di'+r, expression=rirate))

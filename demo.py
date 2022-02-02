@@ -1,16 +1,23 @@
-import functools as F
 import scipy.integrate as SI
 import numpy as N
 import pylab as P
 import gillespy2
+import SIRexample as S
+import facsimile as F
 
 
-
-def simul(modelprocesses):
+def simul():
     # model assembly
-    space =[ modelspace() , travel]
-    dynamics = [modelvariables(), modelprocesses(),'infrecrates']
-    model=distribute_to_ode(space,dynamics)
+    modelspace = S.modelspace()
+    travel=S.travel
+    modelvariables=S.modelvariables()
+    modelprocesses=S.modelprocessesO()
+    fquery='infrecrates'
+    initvalue=S.initvalue
+    
+    space=[modelspace,travel]
+    dynamics=[modelvariables, modelprocesses,'infrecrates']
+    model=F.distribute_to_ode(space,dynamics)
 
     # simulation
     maxt=100 # maximum time of simulation
@@ -18,8 +25,8 @@ def simul(modelprocesses):
     y0=[1000,0,0,1000,0,0,1000,100,10] # Initial state
 
     y0=list()
-    mvss=[mm['name'] for mm in modelvariables()]
-    for r in modelspace()[0]['values']:
+    mvss=[mm['name'] for mm in modelvariables]
+    for r in modelspace[0]['values']:
         for mv in mvss:
             y0.append(initvalue(mv,r))
     
@@ -61,7 +68,7 @@ def simul(modelprocesses):
         for i in range(len(dynamics[0])):
             P.plot(tv,[y[i+j*len(dynamics[0])] for y in yv],label= dynamics[0][i]['name'] + ' in Province '+regions[j],linewidth=4)
     P.grid()
-    P.title('_'.join([f['name'] for f in modelprocesses()]))
+    P.title('_'.join([f['name'] for f in modelprocesses]))
     P.legend()
     P.savefig(regions[j]+'SIR.pdf')
 
@@ -75,7 +82,7 @@ def simul(modelprocesses):
 
             P.plot(tv,[y[i+j*len(dynamics[0])] for y in yv],label= dynamics[0][i]['name'] + ' in Province '+regions[j],linewidth=4)
     P.grid()
-    P.title('_'.join([f['name'] for f in modelprocesses()]))
+    P.title('_'.join([f['name'] for f in modelprocesses]))
     P.legend()
     P.savefig('SIRGcolors.png')
 
@@ -90,12 +97,12 @@ def simul(modelprocesses):
     #P.close()
     return model,tv,yv
 
-def assembleg(modelprocesses):
-    model = SIR(modelprocesses,modelspace)
+def assembleg():
+    model = F.React(S.modelprocessesG,S.modelspace,S.modelvariables,S.initvalue,parameter_query='infrecrates')
     results = model.run(number_of_trajectories=10)
     results.plot()
     P.grid()
-    P.title('_'.join([f.__name__ for f in modelprocesses()]))
+    P.title('_'.join([f.__name__ for f in S.modelprocessesG()]))
     P.savefig('SIRG.png')
     return results, model
 
@@ -103,11 +110,9 @@ def assembleg(modelprocesses):
 
 def runboth():
     P.close('all')
-    for np in [3]:
-        simul(lambda : modelprocessesO()[0:np])
-        fsize=P.gcf().get_size_inches()
-        assembleg(lambda : modelprocessesG()[0:np])
-        P.gcf().set_size_inches(fsize)
-        P.savefig('SIRG.png')
+    simul()
+    fsize=P.gcf().get_size_inches()
+    assembleg()
+    P.gcf().set_size_inches(fsize)
     P.show(block=False)
 
