@@ -110,11 +110,15 @@ def assembleg():
 
 
 
-def runboth():
+def runboth(figuresBlock=True):
     P.close('all')
     simul()
     fsize=P.gcf().get_size_inches()
     assembleg()
     P.gcf().set_size_inches(fsize)
-    P.show(block=False)
+    P.show(block=figuresBlock)
 
+if __name__ == "__main__":
+    print("facsimile demo. Running both simulations:")
+    runboth(figuresBlock=True)
+    print("Good-bye")
