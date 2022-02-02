@@ -6,7 +6,12 @@
 #
 
 def fermi(query,indexvalue):
+    """
 
+    :param query:
+    :param indexvalue:
+    :return:
+    """
     if query=='infrecrates':
         return infrecrate(indexvalue)
     else:

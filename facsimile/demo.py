@@ -7,6 +7,10 @@ import facsimile.framework as F
 
 
 def simul():
+    """
+
+    :return:
+    """
     # model assembly
     modelspace = S.modelspace()
     travel=S.travel
@@ -98,6 +102,10 @@ def simul():
     return model,tv,yv
 
 def assembleg():
+    """
+
+    :return:
+    """
     advrate=1e-4
     modelprocesses=[p['implementation'] for p in S.getprocessimplementation('Gillespie')]
     model = F.React(modelprocesses,S.modelspace,S.modelvariables,S.initvalue,advrate,parameter_query='infrecrates')
@@ -111,6 +119,11 @@ def assembleg():
 
 
 def runboth(figuresBlock=True):
+    """
+
+    :param figuresBlock: If true, then the plots block the function
+    :return:
+    """
     P.close('all')
     simul()
     fsize=P.gcf().get_size_inches()

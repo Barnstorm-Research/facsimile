@@ -64,6 +64,11 @@ def applyadv(advoper, var, indexvalues):
 
 
 def bvp(modelprocesses):
+    """
+
+    :param modelprocesses:
+    :return:
+    """
     # model assembly
     space =[ provinces() , travel]
     dynamics = [modelvariables(), modelprocesses(),'infrecrates']

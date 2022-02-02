@@ -18,6 +18,10 @@ import gillespy2
 #
 
 def modelvariables():
+    """
+
+    :return:
+    """
     mv=list()
     for v in  ['S','I','R']:
         mvd=dict()
@@ -27,6 +31,10 @@ def modelvariables():
     return mv
 
 def modelprocessesO():
+    """
+
+    :return:
+    """
     mps=list()
     for p in [infection,recovery,reinfection]:
         mp=dict()
@@ -37,6 +45,10 @@ def modelprocessesO():
     return mps
 
 def modelprocesses():
+    """
+
+    :return:
+    """
     mps=list()
     for p in [infection,recovery,reinfection]:
         mp=dict()
@@ -53,6 +65,11 @@ def modelprocesses():
     return mps
 
 def getprocessimplementation(moc):
+    """
+
+    :param moc:
+    :return:
+    """
     if moc=='ODE':
         mps=list()
         for p in [infection,recovery,reinfection]:
@@ -146,6 +163,12 @@ def travel(x,y):
 
 
 def initvalue(variable,zone):
+    """
+
+    :param variable:
+    :param zone:
+    :return:
+    """
     iv=0
     if variable == 'S':
         iv=1000
@@ -157,6 +180,10 @@ def initvalue(variable,zone):
     
     
 def parameters():
+    """
+
+    :return:
+    """
     parms=list()
     parms.append({'name':'Infection_rate','implementation':lambda zone: infrecrate(zone)[0]})
     parms.append({'name':'Recovery_rate','implementation':lambda zone: infrecrate(zone)[1]})
@@ -169,6 +196,10 @@ def parameters():
 #
 
 def modelprocessesG():
+    """
+    Reder model as Gillespie
+    :return:
+    """
     return [infectionG,recoveryG,reinfectionG]
 
 # Translation of reference implementation
