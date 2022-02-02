@@ -11,24 +11,6 @@ import gillespy2
 
 
 
-def initvalue(variable,zone):
-    iv=0
-    if variable == 'S':
-        iv=1000
-    elif variable == 'I':
-        if zone=='Ruralia':
-            iv=100
-    return iv
-        
-    
-    
-def parameters():
-    parms=list()
-    parms.append({'name':'Infection_rate','implementation':lambda zone: infrecrate(zone)[0]})
-    parms.append({'name':'Recovery_rate','implementation':lambda zone: infrecrate(zone)[1]})
-    parms.append({'name':'Reinfection_rate','implementation':lambda zone: infrecrate(zone)[2]})
-    return parms
-
 #
 # This is the dynamics factor
 #
@@ -68,7 +50,27 @@ def modelprocesses():
         mps.append(mp)
     return mps
 
-
+def getprocessimplementation(moc):
+    if moc=='ODE':
+        mps=list()
+        for p in [infection,recovery,reinfection]:
+            mp=dict()
+            mp['name']=p.__name__
+            mp['implementation']=p
+            mp['indices']=['Region']
+            mps.append(mp)
+        return mps
+    elif moc=="Gillespie":
+        mps=list()
+        for p in [infectionG,recoveryG,reinfectionG]:
+            mp=dict()
+            mp['name']=p.__name__
+            mp['implementation']=p
+            mp['indices']=['Region']
+            mps.append(mp)
+        return mps
+        
+    
 # Reference Implementations
 def infection(t,y,params=[1e-2,1e-3,1e-3]):
     beta = params[0]
@@ -116,6 +118,24 @@ def travel(x,y):
     # zone of interest
     return sum([ff*(x-yy) for yy in y])
 
+
+def initvalue(variable,zone):
+    iv=0
+    if variable == 'S':
+        iv=1000
+    elif variable == 'I':
+        if zone=='Ruralia':
+            iv=100
+    return iv
+        
+    
+    
+def parameters():
+    parms=list()
+    parms.append({'name':'Infection_rate','implementation':lambda zone: infrecrate(zone)[0]})
+    parms.append({'name':'Recovery_rate','implementation':lambda zone: infrecrate(zone)[1]})
+    parms.append({'name':'Reinfection_rate','implementation':lambda zone: infrecrate(zone)[2]})
+    return parms
                 
 
 #

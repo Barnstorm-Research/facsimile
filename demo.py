@@ -11,7 +11,7 @@ def simul():
     modelspace = S.modelspace()
     travel=S.travel
     modelvariables=S.modelvariables()
-    modelprocesses=S.modelprocessesO()
+    modelprocesses=S.getprocessimplementation('ODE')
     fquery='infrecrates'
     initvalue=S.initvalue
     
@@ -99,7 +99,8 @@ def simul():
 
 def assembleg():
     advrate=1e-4
-    model = F.React(S.modelprocessesG,S.modelspace,S.modelvariables,S.initvalue,advrate,parameter_query='infrecrates')
+    modelprocesses=[p['implementation'] for p in S.getprocessimplementation('Gillespie')]
+    model = F.React(modelprocesses,S.modelspace,S.modelvariables,S.initvalue,advrate,parameter_query='infrecrates')
     results = model.run(number_of_trajectories=10)
     results.plot()
     P.grid()

@@ -125,7 +125,7 @@ class React(gillespy2.Model):
         for r in modelspace()[0]['values']:
             species=speciesd[r]
             parameters=paramd[r]
-            for re in modelprocesses():
+            for re in modelprocesses:
                 react=re(species,parameters)
                 reactions.append(gillespy2.Reaction(
                     name=react['name']+r, rate=react['rate'], \
