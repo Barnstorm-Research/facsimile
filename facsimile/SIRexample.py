@@ -222,6 +222,7 @@ def recoveryG(y,params):
     Reference:
 
     .. code-block:: python
+
        def recovery(t,y,params=[1e-2,1e-3,1e-3]):
           rho=params[1]
           flow = y[1]*rho
