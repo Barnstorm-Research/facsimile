@@ -1,21 +1,19 @@
-import functools as F
 from typing import List
-
+from facsimile import framework as F
 import scipy.integrate as SI
 import numpy as N
 import pylab as P
 import gillespy2
 
-
-#######################################################
-# Model Definition  FUNCTIONS
-#######################################################
-
+'''
+SIR Model Factors Definition
+'''
 
 
-#
-# This is the dynamics factor
-#
+'''
+Dynamics Factor
+
+'''
 
 def modelvariables():
     """
@@ -23,6 +21,7 @@ def modelvariables():
     describing the Model Variables in the SIR epidemiology model
     The three variables represent the sizes of the Susceptible population
     the infected population and the recovered population
+
     :return: list of dictionaries with keys name and indices
     """
     mv=list()
@@ -33,24 +32,26 @@ def modelvariables():
         mv.append(mvd)
     return mv
 
-def modelprocessesO():
-    """
-
-    :return:
-    """
-    mps=list()
-    for p in [infection,recovery,reinfection]:
+def get_dynamics_factor():
+    sir_df=F.DynamicsFactor()
+    for v in  ['S','I','R']:
+        sir_df.add_variable(v,'Region')
+    
+    for (po,pg) in zip([infection,recovery,reinfection],[infectionG,recoveryG,reinfectionG]):
         mp=dict()
-        mp['name']=p.__name__
-        mp['implementation']=p
-        mp['indices']=['Region']
-        mps.append(mp)
-    return mps
+        mp['name']=po.__name__
+        mp['implementations']=list()
+        source='reference'
+        for (moc,fun)  in zip(['ODE','Gillespie'],[po,pg]):
+            sir_df.add_process(po.__name__,source,moc,fun,['Region'])
+            source='translated'
+        return sir_df
 
 def modelprocesses():
     """
     This function returns a list of dictionaries
     describing the model processes in the SIR epidemiology model
+
     :return:
     """
     mps=list()
@@ -68,45 +69,10 @@ def modelprocesses():
         mps.append(mp)
     return mps
 
+'''
+Space Component
 
-
-def infection(t,y,params=[1e-2,1e-3,1e-3]):
-    """
-    Reference implementation for infection
-    :param t:
-    :param y:
-    :param params:
-    :return:
-    :math:$\frac{dI}{dt}=\beta I S$
-    """
-    beta = params[0]
-    flow=y[0]*y[1]*beta
-    return [-flow,flow,0.0]
-
-def recovery(t,y,params=[1e-2,1e-3,1e-3]):
-    """
-    Reference implementation for recovery
-    :param t:
-    :param y:
-    :param params:
-    :return:
-    """
-    rho=params[1]
-    flow = y[1]*rho
-    return [0.0, -flow,flow]
-
-def reinfection(t,y,params=[1e-2,1e-3,1e-3]):
-    """
-    Reference implementation for reinfection
-    :param t:
-    :param y:
-    :param params:
-    :return:
-    """
-    beta = params[2]
-    flow=y[1]*y[2]*beta
-    return [0.0,flow,-flow]
-
+'''
 
 def modelspace():
     """
@@ -124,23 +90,14 @@ def modelspace():
     #ms['values']=['Age0to16','Age16to40','Age40plus']
     #msp.append(ms)
     return msp
-#
-# This is the advection operator
-#
 
-def travel(x,y):
-    """
-    Advection operator.
-    :param x: population in zone of interest
-    :param y: vector of population in all zones
-    :return:
-    """
-    # Fraction of Population traveling out of zone a and
-    # into zone b per unit time
-    ff = 1e-4  
-    # advection is balance of population out of
-    # zone of interest
-    return sum([ff*(x-yy) for yy in y])
+
+'''
+Parameters Factor
+
+'''
+
+
 
 
 def initvalue(variable,zone):
@@ -157,9 +114,7 @@ def initvalue(variable,zone):
         if zone=='Ruralia':
             iv=100
     return iv
-        
-    
-    
+            
 def parameters():
     """
 
@@ -172,16 +127,69 @@ def parameters():
     return parms
                 
 
-#
-# Gillespie Rendering
-#
 
-def modelprocessesG():
+
+'''
+Function definitions
+'''
+
+
+def infection(t,y,params=[1e-2,1e-3,1e-3]):
+    r"""
+    Reference implementation for infection
+    as an ODE
+
+    :param t: time
+    :param y: list of current values of S, I, R
+    :param params: list of model paramters 
+    :return: list with contributions of infection process to S, I, R derivatives
+
+    :math:'\frac{dS}{dt}=-\beta I S'
+    :math:'\frac{dI}{dt}=\beta I S'
+    :math:'\frac{dR}{dt}=0'
     """
-    Reder model as Gillespie
-    :return:
+    beta = params[0]
+    flow=y[0]*y[1]*beta
+    return [-flow,flow,0.0]
+
+def recovery(t,y,params=[1e-2,1e-3,1e-3]):
+    r"""
+    Reference implementation for recovery
+
+    :param t: time
+    :param y: list of current values of S, I, R
+    :param params: list of model paramters 
+    :return: list with contributions of recovery process to S, I, R derivatives
+
+    :math:'\frac{dS}{dt}=0'
+    :math:'\frac{dI}{dt}=-\rho I'
+    :math:'\frac{dR}{dt}=\rho I'
+
+
+
     """
-    return [infectionG,recoveryG,reinfectionG]
+    rho=params[1]
+    flow = y[1]*rho
+    return [0.0, -flow,flow]
+
+def reinfection(t,y,params=[1e-2,1e-3,1e-3]):
+    r"""
+    Reference implementation for recovery
+
+    :param t: time
+    :param y: list of current values of S, I, R
+    :param params: list of model paramters 
+    :return: list with contributions of recovery process to S, I, R derivatives
+
+    :math:'\frac{dS}{dt}=0'
+    :math:'\frac{dI}{dt}=\beta I S'
+    :math:'\frac{dR}{dt}=-\beta I R'
+
+    """
+    beta = params[2]
+    flow=y[1]*y[2]*beta
+    return [0.0,flow,-flow]
+
 
 # Translation of reference implementation
 
@@ -203,6 +211,7 @@ def infectionG(y,params):
     react['reactants']={y[0]:1,y[1]:1}
     react['products']={y[1]:2}
     return react
+
 def recoveryG(y,params):
     """
     Reference:
@@ -240,3 +249,23 @@ def reinfectionG(y,params):
     react['reactants']={y[1]:1,y[2]:1}
     react['products']={y[1]:2}
     return react
+
+
+#
+# This is the advection operator
+#
+
+def travel(x,y):
+    """
+    Advection operator.
+    :param x: population in zone of interest
+    :param y: vector of population in all zones
+    :return:
+    """
+    # Fraction of Population traveling out of zone a and
+    # into zone b per unit time
+    ff = 1e-4  
+    # advection is balance of population out of
+    # zone of interest
+    return sum([ff*(x-yy) for yy in y])
+

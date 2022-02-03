@@ -6,7 +6,26 @@ import gillespy2
 import facsimile.fermi as fermi
 
 
+class DynamicsFactor:
+    ''' 
+    Hold the data for a dynamic factor
+    '''
+    processes = list()
+    variables = list()
 
+    def add_variable(self,name,indices=[]):
+        self.variables.append({'name':name,'indices':indices})
+        return
+    def add_process(self, name,source,moc,fun,indices=[]):
+        names=[p['name'] for p in self.processes]
+        imp={'source':source,'moc':moc,'function':fun}
+        if name in names:
+            i=names.index(name)
+            self.processes[i]['implementations'].append(imp)
+        else:
+            self.processes.append({'name':name,'implementations':[imp],'indices':indices})
+        return
+    
 #######################################################
 # FRAMEWORK FUNCTIONS
 #######################################################

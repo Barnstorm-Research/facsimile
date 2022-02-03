@@ -1,4 +1,4 @@
-import scipy.integrate as SI
+import scipy.integrAate as SI
 import numpy as N
 import pylab as P
 import gillespy2
@@ -6,7 +6,7 @@ import facsimile.SIRexample as S
 import facsimile.framework as F
 
 
-def simul():
+def simul_o():
     """
 
     :return:
@@ -100,9 +100,9 @@ def simul():
     #        P.legend()
     #    P.savefig(space[0][j]+'SIR.pdf')
     #P.close()
-    return model,tv,yv
+    return [tv,yv],model
 
-def assembleg():
+def simul_g():
     """
 
     :return:
@@ -115,7 +115,7 @@ def assembleg():
     results = model.run(number_of_trajectories=10)
     results.plot()
     P.grid()
-    P.title('_'.join([f.__name__ for f in S.modelprocessesG()]))
+    P.title('_'.join([f.__name__ for f in modelprocesses]))
     P.savefig('SIRG.png')
     return results, model
 
