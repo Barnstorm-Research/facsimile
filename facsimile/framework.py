@@ -15,6 +15,7 @@ def distribute_to_ode(space,dynamics):
     """
     This functionn is the "inverse" of factorization. It takes as inputs the 2 factors, space and dynamics, and
     outputs the SIR model in ODE form.
+
     :param space:
     :param dynamics:
     :return:
@@ -38,6 +39,7 @@ def applyadv(advoper, var, indexvalues):
     """
     This is an utility function to apply the advection operator to the whole model.
     It's called by distribute only.
+
     :param advoper:
     :param var:
     :param indexvalues:
