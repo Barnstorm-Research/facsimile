@@ -23,6 +23,7 @@ def modelvariables():
     describing the Model Variables in the SIR epidemiology model
     The three variables represent the sizes of the Susceptible population
     the infected population and the recovered population
+
     :return: list of dictionaries with keys name and indices
     """
     mv=list()
@@ -51,6 +52,7 @@ def modelprocesses():
     """
     This function returns a list of dictionaries
     describing the model processes in the SIR epidemiology model
+
     :return:
     """
     mps=list()
@@ -73,12 +75,14 @@ def modelprocesses():
 def infection(t,y,params=[1e-2,1e-3,1e-3]):
     """
     Reference implementation for infection
+
     :param t:
     :param y:
     :param params:
-    :return:
-    :math:$\frac{dI}{dt}=\beta I S
+    :return: :math:`\frac{dI}{dt}=\beta I S`
+
     """
+
     beta = params[0]
     flow=y[0]*y[1]*beta
     return [-flow,flow,0.0]
@@ -86,6 +90,7 @@ def infection(t,y,params=[1e-2,1e-3,1e-3]):
 def recovery(t,y,params=[1e-2,1e-3,1e-3]):
     """
     Reference implementation for recovery
+
     :param t:
     :param y:
     :param params:
@@ -98,6 +103,7 @@ def recovery(t,y,params=[1e-2,1e-3,1e-3]):
 def reinfection(t,y,params=[1e-2,1e-3,1e-3]):
     """
     Reference implementation for reinfection
+
     :param t:
     :param y:
     :param params:
@@ -111,6 +117,7 @@ def reinfection(t,y,params=[1e-2,1e-3,1e-3]):
 def modelspace():
     """
     Creates the geometry, index space
+
     :return:
     """
     msp=list()
@@ -131,6 +138,7 @@ def modelspace():
 def travel(x,y):
     """
     Advection operator.
+
     :param x: population in zone of interest
     :param y: vector of population in all zones
     :return:
@@ -179,6 +187,7 @@ def parameters():
 def modelprocessesG():
     """
     Reder model as Gillespie
+
     :return:
     """
     return [infectionG,recoveryG,reinfectionG]
@@ -188,10 +197,14 @@ def modelprocessesG():
 def infectionG(y,params):
     """
     Reference:
-    def infection(t,y,params=[1e-2,1e-3,1e-3]):
-       beta = params[0]
-       flow=y[0]*y[1]*beta
-       return [-flow,flow,0.0]
+
+    .. code-block:: python
+
+       def infection(t,y,params=[1e-2,1e-3,1e-3]):
+          beta = params[0]
+          flow=y[0]*y[1]*beta
+          return [-flow,flow,0.0]
+
     :param y:
     :param params:
     :return:
@@ -203,13 +216,17 @@ def infectionG(y,params):
     react['reactants']={y[0]:1,y[1]:1}
     react['products']={y[1]:2}
     return react
+
 def recoveryG(y,params):
     """
     Reference:
-    def recovery(t,y,params=[1e-2,1e-3,1e-3]):
-    rho=params[1]
-    flow = y[1]*rho
-    return [0.0, -flow,flow]
+
+    .. code-block:: python
+       def recovery(t,y,params=[1e-2,1e-3,1e-3]):
+          rho=params[1]
+          flow = y[1]*rho
+          return [0.0, -flow,flow]
+
     :param y:
     :param params:
     :return:
@@ -225,10 +242,14 @@ def recoveryG(y,params):
 def reinfectionG(y,params):
     """
     Reference:
-    def reinfection(t,y,params=[1e-2,1e-3,1e-3]):
-        beta = params[2]
-        flow=y[1]*y[2]*beta
-        return [0.0,flow,-flow]
+
+    .. code-block:: python
+
+       def reinfection(t,y,params=[1e-2,1e-3,1e-3]):
+          beta = params[2]
+          flow=y[1]*y[2]*beta
+          return [0.0,flow,-flow]
+
     :param y:
     :param params:
     :return:

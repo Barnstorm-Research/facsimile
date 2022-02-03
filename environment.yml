@@ -8,4 +8,5 @@ dependencies:
   - scipy==1.7.3
   - matplotlib==3.5.0
   - pip:
+      - sphinx
       - gillespy2==1.6.7
