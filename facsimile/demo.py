@@ -1,4 +1,4 @@
-import scipy.integrAate as SI
+import scipy.integrate as SI
 import numpy as N
 import pylab as P
 import gillespy2
@@ -11,30 +11,21 @@ def simul_o():
 
     :return:
     """
-    # model assembly
-    modelspace = S.modelspace()
-    travel=S.travel
-    modelvariables=S.modelvariables()
-    a=sum([f['implementations'] for f in S.modelprocesses()],[])
-    modelprocesses= [{'implementation':h['function'],'name':h['function'].__name__} for h in a if h['moc']=='ODE']
-    fquery='infrecrates'
-    initvalue=S.initvalue
-    
-    space=[modelspace,travel]
-    dynamics=[modelvariables, modelprocesses,'infrecrates']
-    model=F.distribute_to_ode(space,dynamics)
+
+    SIRdyn=S.get_dynamics_factor()
+    SIRspace=S.get_space_factor()
+
+    model=F.distribute_to_ode(SIRspace,SIRdyn,'infrecrates')
 
     # simulation
-    maxt=100 # maximum time of simulation
-    
-    y0=[1000,0,0,1000,0,0,1000,100,10] # Initial state
-
     y0=list()
-    mvss=[mm['name'] for mm in modelvariables]
-    for r in modelspace[0]['values']:
+    mvss=[mm['name'] for mm in SIRdyn.variables]
+    regions=SIRspace.get_space()[0]['values']
+    for r in regions:
         for mv in mvss:
-            y0.append(initvalue(mv,r))
-    
+            y0.append(S.initvalue(mv,r))
+            
+    maxt=100 # maximum time of simulation
     out = SI.RK45(model,0,y0,maxt)
 
     tv=list()
@@ -47,59 +38,31 @@ def simul_o():
         yv.append(list(out.y))
 
 
-    c=[95*(1-P.e**(-t/40))+5 for t in tv]
-        
-    # positivity rate
-    p=[0]
-    yo=yv[0]
-    to=tv[0]
-    for (t,y) in zip(tv[1:],yv[1:]):
-        p.append((y[4]-yo[4]-yo[5]+y[5])/(t-to))
-        yo=y
-        to=t
-    P.figure()
-    P.plot(tv,p,label='infection rate (Idot)',linewidth=2)
-    P.plot(tv,c,label= 'Coverage (% of new infections  getting tested',linewidth=2)
-    P.plot(tv,[pp*cc/100.0 for (pp,cc) in zip(p,c)], label='New positive tests',linewidth=2)
-    P.legend()
-    P.grid()
-
     # plot results
     P.figure()
-    regions=space[0][0]['values']
 
     for j in range(len(regions)):
         #P.figure()
-        for i in range(len(dynamics[0])):
-            P.plot(tv,[y[i+j*len(dynamics[0])] for y in yv],label= dynamics[0][i]['name'] + ' in Province '+regions[j],linewidth=4)
+        for i in range(len(SIRdyn.variables)):
+            P.plot(tv,[y[i+j*len(SIRdyn.variables)] for y in yv],label= SIRdyn.variables[i]['name'] + ' in Province '+regions[j],linewidth=4)
     P.grid()
-    P.title('_'.join([f['name'] for f in modelprocesses]))
+    #P.title('_'.join([f['name'] for f in modelprocesses]))
     P.legend()
     P.savefig(regions[j]+'SIR.pdf')
 
     # plot results
     P.figure()
-    regions=space[0][0]['values']
     for j in [0,1]:
         for i in [1,2,0]:
 
         #P.figure()
 
-            P.plot(tv,[y[i+j*len(dynamics[0])] for y in yv],label= dynamics[0][i]['name'] + ' in Province '+regions[j],linewidth=4)
+            P.plot(tv,[y[i+j*len(SIRdyn.variables)] for y in yv],label= SIRdyn.variables[i]['name'] + ' in Province '+regions[j],linewidth=4)
     P.grid()
-    P.title('_'.join([f['name'] for f in modelprocesses]))
+    #P.title('_'.join([f['name'] for f in modelprocesses]))
     P.legend()
     P.savefig('SIRGcolors.png')
 
-    # plot results
-    #P.figure()
-    #for i in [1,2,0]:
-    #    for j in [1,0]:
-    #        P.plot(tv,[y[i+j*len(dynamics[0])] for y in yv],label= dynamics[0][i] + ' in Province '+space[0][j],linewidth=4)
-    #        P.grid()
-    #        P.legend()
-    #    P.savefig(space[0][j]+'SIR.pdf')
-    #P.close()
     return [tv,yv],model
 
 def simul_g():
@@ -108,14 +71,15 @@ def simul_g():
     :return:
     """
     advrate=1e-4
-    #modelprocesses=[p['implementation'] for p in S.getprocessimplementation('Gillespie')]
-    a=sum([f['implementations'] for f in S.modelprocesses()],[])
-    modelprocesses= [h['function'] for h in a if h['moc']=='Gillespie']
-    model = F.React(modelprocesses,S.modelspace,S.modelvariables,S.initvalue,advrate,parameter_query='infrecrates')
+
+
+    SIRdyn=S.get_dynamics_factor()
+    SIRspace=S.get_space_factor()
+    model = F.React(SIRdyn,SIRspace,S.initvalue,advrate,parameter_query='infrecrates')
     results = model.run(number_of_trajectories=10)
     results.plot()
     P.grid()
-    P.title('_'.join([f.__name__ for f in modelprocesses]))
+#    P.title('_'.join([f.__name__ for f in modelprocesses]))
     P.savefig('SIRG.png')
     return results, model
 

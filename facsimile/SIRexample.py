@@ -15,23 +15,6 @@ Dynamics Factor
 
 '''
 
-def modelvariables():
-    """
-    This function returns a list of dictionnaries 
-    describing the Model Variables in the SIR epidemiology model
-    The three variables represent the sizes of the Susceptible population
-    the infected population and the recovered population
-
-    :return: list of dictionaries with keys name and indices
-    """
-    mv=list()
-    for v in  ['S','I','R']:
-        mvd=dict()
-        mvd['name'] = v
-        mvd['indices'] = ['Region'] #['Region','Age_Group']
-        mv.append(mvd)
-    return mv
-
 def get_dynamics_factor():
     sir_df=F.DynamicsFactor()
     for v in  ['S','I','R']:
@@ -45,60 +28,25 @@ def get_dynamics_factor():
         for (moc,fun)  in zip(['ODE','Gillespie'],[po,pg]):
             sir_df.add_process(po.__name__,source,moc,fun,['Region'])
             source='translated'
-        return sir_df
+    return sir_df
 
-def modelprocesses():
-    """
-    This function returns a list of dictionaries
-    describing the model processes in the SIR epidemiology model
-
-    :return:
-    """
-    mps=list()
-    for (po,pg) in zip([infection,recovery,reinfection],[infectionG,recoveryG,reinfectionG]):
-        mp=dict()
-        mp['name']=po.__name__
-        mp['implementations']=list()
-        source='reference'
-        for (moc,fun)  in zip(['ODE','Gillespie'],[po,pg]):
-            imp=dict()
-            imp={'source':source,'moc':moc,'function':fun}
-            mp['implementations'].append(imp)
-            source='translated'
-        mp['indices']=['Region']
-        mps.append(mp)
-    return mps
 
 '''
 Space Component
 
 '''
 
-def modelspace():
-    """
-    Creates the geometry, index space
-    :return:
-    """
-    msp=list()
-    ms=dict()
-    ms['name']='Region'
-    ms['values']=['Metroton','Suburbium','Ruralia']
-    ms['advection']={'name':'travel','implementation':travel}
-    msp.append(ms)
-    #ms=dict()
-    #ms['name']='Age_Group'
-    #ms['values']=['Age0to16','Age16to40','Age40plus']
-    #msp.append(ms)
-    return msp
-
+def get_space_factor():
+    SIRsp=F.SpaceFactor()    
+    SIRsp.add_index('Region',['Metroton','Suburbium','Ruralia'])
+    SIRsp.add_advection('Travel','Region',travel)
+    return SIRsp 
+                        
 
 '''
 Parameters Factor
 
 '''
-
-
-
 
 def initvalue(variable,zone):
     """
@@ -114,19 +62,15 @@ def initvalue(variable,zone):
         if zone=='Ruralia':
             iv=100
     return iv
-            
-def parameters():
-    """
 
-    :return:
-    """
-    parms=list()
-    parms.append({'name':'Infection_rate','implementation':lambda zone: infrecrate(zone)[0]})
-    parms.append({'name':'Recovery_rate','implementation':lambda zone: infrecrate(zone)[1]})
-    parms.append({'name':'Reinfection_rate','implementation':lambda zone: infrecrate(zone)[2]})
-    return parms
-                
 
+def get_params_factor():
+    
+    SIRparams=F.ParameterFactor()
+    SIRparams.add_param('Infection_rate',lambda zone: infrecrate(zone)[0])
+    SIRparams.add_param('Recovery_rate',lambda zone: infrecrate(zone)[1])
+    SIRparams.add_param('Reinfection_rate',lambda zone: infrecrate(zone)[2])
+    return SIRparams
 
 
 '''
