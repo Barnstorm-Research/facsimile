@@ -10,8 +10,12 @@ class DynamicsFactor:
     ''' 
     Hold the data for a dynamic factor
     '''
-    processes = list()
-    variables = list()
+    # processes = list()
+    # variables = list()
+    
+    def __init__(self):
+        self.processes = []
+        self.variables = []
 
     def add_variable(self,name,indices=[]):
         self.variables.append({'name':name,'indices':indices})
