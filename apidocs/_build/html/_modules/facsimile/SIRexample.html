@@ -1,0 +1,346 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>facsimile.SIRexample &#8212; facsimile  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/classic.css" />
+    
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">facsimile  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">facsimile.SIRexample</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for facsimile.SIRexample</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">functools</span> <span class="k">as</span> <span class="nn">F</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+
+<span class="kn">import</span> <span class="nn">scipy.integrate</span> <span class="k">as</span> <span class="nn">SI</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">N</span>
+<span class="kn">import</span> <span class="nn">pylab</span> <span class="k">as</span> <span class="nn">P</span>
+<span class="kn">import</span> <span class="nn">gillespy2</span>
+
+
+<span class="c1">#######################################################</span>
+<span class="c1"># Model Definition  FUNCTIONS</span>
+<span class="c1">#######################################################</span>
+
+
+
+<span class="c1">#</span>
+<span class="c1"># This is the dynamics factor</span>
+<span class="c1">#</span>
+
+<div class="viewcode-block" id="modelvariables"><a class="viewcode-back" href="../../facsimile.html#facsimile.SIRexample.modelvariables">[docs]</a><span class="k">def</span> <span class="nf">modelvariables</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function returns a list of dictionnaries </span>
+<span class="sd">    describing the Model Variables in the SIR epidemiology model</span>
+<span class="sd">    The three variables represent the sizes of the Susceptible population</span>
+<span class="sd">    the infected population and the recovered population</span>
+
+<span class="sd">    :return: list of dictionaries with keys name and indices</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mv</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span>  <span class="p">[</span><span class="s1">&#39;S&#39;</span><span class="p">,</span><span class="s1">&#39;I&#39;</span><span class="p">,</span><span class="s1">&#39;R&#39;</span><span class="p">]:</span>
+        <span class="n">mvd</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+        <span class="n">mvd</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+        <span class="n">mvd</span><span class="p">[</span><span class="s1">&#39;indices&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Region&#39;</span><span class="p">]</span> <span class="c1">#[&#39;Region&#39;,&#39;Age_Group&#39;]</span>
+        <span class="n">mv</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mvd</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mv</span></div>
+
+<div class="viewcode-block" id="modelprocessesO"><a class="viewcode-back" href="../../facsimile.html#facsimile.SIRexample.modelprocessesO">[docs]</a><span class="k">def</span> <span class="nf">modelprocessesO</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mps</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">[</span><span class="n">infection</span><span class="p">,</span><span class="n">recovery</span><span class="p">,</span><span class="n">reinfection</span><span class="p">]:</span>
+        <span class="n">mp</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+        <span class="n">mp</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="n">mp</span><span class="p">[</span><span class="s1">&#39;implementation&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">p</span>
+        <span class="n">mp</span><span class="p">[</span><span class="s1">&#39;indices&#39;</span><span class="p">]</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Region&#39;</span><span class="p">]</span>
+        <span class="n">mps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mp</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mps</span></div>
+
+<div class="viewcode-block" id="modelprocesses"><a class="viewcode-back" href="../../facsimile.html#facsimile.SIRexample.modelprocesses">[docs]</a><span class="k">def</span> <span class="nf">modelprocesses</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function returns a list of dictionaries</span>
+<span class="sd">    describing the model processes in the SIR epidemiology model</span>
+
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mps</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">po</span><span class="p">,</span><span class="n">pg</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="n">infection</span><span class="p">,</span><span class="n">recovery</span><span class="p">,</span><span class="n">reinfection</span><span class="p">],[</span><span class="n">infectionG</span><span class="p">,</span><span class="n">recoveryG</span><span class="p">,</span><span class="n">reinfectionG</span><span class="p">]):</span>
+        <span class="n">mp</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+        <span class="n">mp</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">po</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="n">mp</span><span class="p">[</span><span class="s1">&#39;implementations&#39;</span><span class="p">]</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+        <span class="n">source</span><span class="o">=</span><span class="s1">&#39;reference&#39;</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">moc</span><span class="p">,</span><span class="n">fun</span><span class="p">)</span>  <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="s1">&#39;ODE&#39;</span><span class="p">,</span><span class="s1">&#39;Gillespie&#39;</span><span class="p">],[</span><span class="n">po</span><span class="p">,</span><span class="n">pg</span><span class="p">]):</span>
+            <span class="n">imp</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+            <span class="n">imp</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;source&#39;</span><span class="p">:</span><span class="n">source</span><span class="p">,</span><span class="s1">&#39;moc&#39;</span><span class="p">:</span><span class="n">moc</span><span class="p">,</span><span class="s1">&#39;function&#39;</span><span class="p">:</span><span class="n">fun</span><span class="p">}</span>
+            <span class="n">mp</span><span class="p">[</span><span class="s1">&#39;implementations&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">imp</span><span class="p">)</span>
+            <span class="n">source</span><span class="o">=</span><span class="s1">&#39;translated&#39;</span>
+        <span class="n">mp</span><span class="p">[</span><span class="s1">&#39;indices&#39;</span><span class="p">]</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Region&#39;</span><span class="p">]</span>
+        <span class="n">mps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mp</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mps</span></div>
+
+
+
+<div class="viewcode-block" id="infection"><a class="viewcode-back" href="../../facsimile.html#facsimile.SIRexample.infection">[docs]</a><span class="k">def</span> <span class="nf">infection</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">params</span><span class="o">=</span><span class="p">[</span><span class="mf">1e-2</span><span class="p">,</span><span class="mf">1e-3</span><span class="p">,</span><span class="mf">1e-3</span><span class="p">]):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reference implementation for infection</span>
+
+<span class="sd">    :param t:</span>
+<span class="sd">    :param y:</span>
+<span class="sd">    :param params:</span>
+<span class="sd">    :return: :math:`\frac{dI}{dt}=\beta I S`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">beta</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">flow</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">beta</span>
+    <span class="k">return</span> <span class="p">[</span><span class="o">-</span><span class="n">flow</span><span class="p">,</span><span class="n">flow</span><span class="p">,</span><span class="mf">0.0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="recovery"><a class="viewcode-back" href="../../facsimile.html#facsimile.SIRexample.recovery">[docs]</a><span class="k">def</span> <span class="nf">recovery</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">params</span><span class="o">=</span><span class="p">[</span><span class="mf">1e-2</span><span class="p">,</span><span class="mf">1e-3</span><span class="p">,</span><span class="mf">1e-3</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reference implementation for recovery</span>
+
+<span class="sd">    :param t:</span>
+<span class="sd">    :param y:</span>
+<span class="sd">    :param params:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">rho</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">flow</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">rho</span>
+    <span class="k">return</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="n">flow</span><span class="p">,</span><span class="n">flow</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="reinfection"><a class="viewcode-back" href="../../facsimile.html#facsimile.SIRexample.reinfection">[docs]</a><span class="k">def</span> <span class="nf">reinfection</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">params</span><span class="o">=</span><span class="p">[</span><span class="mf">1e-2</span><span class="p">,</span><span class="mf">1e-3</span><span class="p">,</span><span class="mf">1e-3</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reference implementation for reinfection</span>
+
+<span class="sd">    :param t:</span>
+<span class="sd">    :param y:</span>
+<span class="sd">    :param params:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">beta</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">flow</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">beta</span>
+    <span class="k">return</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span><span class="n">flow</span><span class="p">,</span><span class="o">-</span><span class="n">flow</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="modelspace"><a class="viewcode-back" href="../../facsimile.html#facsimile.SIRexample.modelspace">[docs]</a><span class="k">def</span> <span class="nf">modelspace</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates the geometry, index space</span>
+
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">msp</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+    <span class="n">ms</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+    <span class="n">ms</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;Region&#39;</span>
+    <span class="n">ms</span><span class="p">[</span><span class="s1">&#39;values&#39;</span><span class="p">]</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Metroton&#39;</span><span class="p">,</span><span class="s1">&#39;Suburbium&#39;</span><span class="p">,</span><span class="s1">&#39;Ruralia&#39;</span><span class="p">]</span>
+    <span class="n">ms</span><span class="p">[</span><span class="s1">&#39;advection&#39;</span><span class="p">]</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;travel&#39;</span><span class="p">,</span><span class="s1">&#39;implementation&#39;</span><span class="p">:</span><span class="n">travel</span><span class="p">}</span>
+    <span class="n">msp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ms</span><span class="p">)</span>
+    <span class="c1">#ms=dict()</span>
+    <span class="c1">#ms[&#39;name&#39;]=&#39;Age_Group&#39;</span>
+    <span class="c1">#ms[&#39;values&#39;]=[&#39;Age0to16&#39;,&#39;Age16to40&#39;,&#39;Age40plus&#39;]</span>
+    <span class="c1">#msp.append(ms)</span>
+    <span class="k">return</span> <span class="n">msp</span></div>
+<span class="c1">#</span>
+<span class="c1"># This is the advection operator</span>
+<span class="c1">#</span>
+
+<div class="viewcode-block" id="travel"><a class="viewcode-back" href="../../facsimile.html#facsimile.SIRexample.travel">[docs]</a><span class="k">def</span> <span class="nf">travel</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Advection operator.</span>
+
+<span class="sd">    :param x: population in zone of interest</span>
+<span class="sd">    :param y: vector of population in all zones</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Fraction of Population traveling out of zone a and</span>
+    <span class="c1"># into zone b per unit time</span>
+    <span class="n">ff</span> <span class="o">=</span> <span class="mf">1e-4</span>  
+    <span class="c1"># advection is balance of population out of</span>
+    <span class="c1"># zone of interest</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">([</span><span class="n">ff</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">yy</span><span class="p">)</span> <span class="k">for</span> <span class="n">yy</span> <span class="ow">in</span> <span class="n">y</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="initvalue"><a class="viewcode-back" href="../../facsimile.html#facsimile.SIRexample.initvalue">[docs]</a><span class="k">def</span> <span class="nf">initvalue</span><span class="p">(</span><span class="n">variable</span><span class="p">,</span><span class="n">zone</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :param variable:</span>
+<span class="sd">    :param zone:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">iv</span><span class="o">=</span><span class="mi">0</span>
+    <span class="k">if</span> <span class="n">variable</span> <span class="o">==</span> <span class="s1">&#39;S&#39;</span><span class="p">:</span>
+        <span class="n">iv</span><span class="o">=</span><span class="mi">1000</span>
+    <span class="k">elif</span> <span class="n">variable</span> <span class="o">==</span> <span class="s1">&#39;I&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">zone</span><span class="o">==</span><span class="s1">&#39;Ruralia&#39;</span><span class="p">:</span>
+            <span class="n">iv</span><span class="o">=</span><span class="mi">100</span>
+    <span class="k">return</span> <span class="n">iv</span></div>
+        
+    
+    
+<div class="viewcode-block" id="parameters"><a class="viewcode-back" href="../../facsimile.html#facsimile.SIRexample.parameters">[docs]</a><span class="k">def</span> <span class="nf">parameters</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">parms</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+    <span class="n">parms</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;Infection_rate&#39;</span><span class="p">,</span><span class="s1">&#39;implementation&#39;</span><span class="p">:</span><span class="k">lambda</span> <span class="n">zone</span><span class="p">:</span> <span class="n">infrecrate</span><span class="p">(</span><span class="n">zone</span><span class="p">)[</span><span class="mi">0</span><span class="p">]})</span>
+    <span class="n">parms</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;Recovery_rate&#39;</span><span class="p">,</span><span class="s1">&#39;implementation&#39;</span><span class="p">:</span><span class="k">lambda</span> <span class="n">zone</span><span class="p">:</span> <span class="n">infrecrate</span><span class="p">(</span><span class="n">zone</span><span class="p">)[</span><span class="mi">1</span><span class="p">]})</span>
+    <span class="n">parms</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;Reinfection_rate&#39;</span><span class="p">,</span><span class="s1">&#39;implementation&#39;</span><span class="p">:</span><span class="k">lambda</span> <span class="n">zone</span><span class="p">:</span> <span class="n">infrecrate</span><span class="p">(</span><span class="n">zone</span><span class="p">)[</span><span class="mi">2</span><span class="p">]})</span>
+    <span class="k">return</span> <span class="n">parms</span></div>
+                
+
+<span class="c1">#</span>
+<span class="c1"># Gillespie Rendering</span>
+<span class="c1">#</span>
+
+<div class="viewcode-block" id="modelprocessesG"><a class="viewcode-back" href="../../facsimile.html#facsimile.SIRexample.modelprocessesG">[docs]</a><span class="k">def</span> <span class="nf">modelprocessesG</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reder model as Gillespie</span>
+
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">infectionG</span><span class="p">,</span><span class="n">recoveryG</span><span class="p">,</span><span class="n">reinfectionG</span><span class="p">]</span></div>
+
+<span class="c1"># Translation of reference implementation</span>
+
+<div class="viewcode-block" id="infectionG"><a class="viewcode-back" href="../../facsimile.html#facsimile.SIRexample.infectionG">[docs]</a><span class="k">def</span> <span class="nf">infectionG</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reference:</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">       def infection(t,y,params=[1e-2,1e-3,1e-3]):</span>
+<span class="sd">          beta = params[0]</span>
+<span class="sd">          flow=y[0]*y[1]*beta</span>
+<span class="sd">          return [-flow,flow,0.0]</span>
+
+<span class="sd">    :param y:</span>
+<span class="sd">    :param params:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">beta</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">react</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+    <span class="n">react</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;Infection&#39;</span>
+    <span class="n">react</span><span class="p">[</span><span class="s1">&#39;rate&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">beta</span>
+    <span class="n">react</span><span class="p">[</span><span class="s1">&#39;reactants&#39;</span><span class="p">]</span><span class="o">=</span><span class="p">{</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="mi">1</span><span class="p">,</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span><span class="mi">1</span><span class="p">}</span>
+    <span class="n">react</span><span class="p">[</span><span class="s1">&#39;products&#39;</span><span class="p">]</span><span class="o">=</span><span class="p">{</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span><span class="mi">2</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">react</span></div>
+
+<div class="viewcode-block" id="recoveryG"><a class="viewcode-back" href="../../facsimile.html#facsimile.SIRexample.recoveryG">[docs]</a><span class="k">def</span> <span class="nf">recoveryG</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reference:</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">       def recovery(t,y,params=[1e-2,1e-3,1e-3]):</span>
+<span class="sd">          rho=params[1]</span>
+<span class="sd">          flow = y[1]*rho</span>
+<span class="sd">          return [0.0, -flow,flow]</span>
+
+<span class="sd">    :param y:</span>
+<span class="sd">    :param params:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">rho</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">react</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+    <span class="n">react</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;Recovery&#39;</span>
+    <span class="n">react</span><span class="p">[</span><span class="s1">&#39;rate&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">rho</span>
+    <span class="n">react</span><span class="p">[</span><span class="s1">&#39;reactants&#39;</span><span class="p">]</span><span class="o">=</span><span class="p">{</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span><span class="mi">1</span><span class="p">}</span>
+    <span class="n">react</span><span class="p">[</span><span class="s1">&#39;products&#39;</span><span class="p">]</span><span class="o">=</span><span class="p">{</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span><span class="mi">1</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">react</span></div>
+
+<div class="viewcode-block" id="reinfectionG"><a class="viewcode-back" href="../../facsimile.html#facsimile.SIRexample.reinfectionG">[docs]</a><span class="k">def</span> <span class="nf">reinfectionG</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reference:</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">       def reinfection(t,y,params=[1e-2,1e-3,1e-3]):</span>
+<span class="sd">          beta = params[2]</span>
+<span class="sd">          flow=y[1]*y[2]*beta</span>
+<span class="sd">          return [0.0,flow,-flow]</span>
+
+<span class="sd">    :param y:</span>
+<span class="sd">    :param params:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">beta</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">react</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+    <span class="n">react</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;Reinfection&#39;</span>
+    <span class="n">react</span><span class="p">[</span><span class="s1">&#39;rate&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">beta</span>
+    <span class="n">react</span><span class="p">[</span><span class="s1">&#39;reactants&#39;</span><span class="p">]</span><span class="o">=</span><span class="p">{</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span><span class="mi">1</span><span class="p">,</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span><span class="mi">1</span><span class="p">}</span>
+    <span class="n">react</span><span class="p">[</span><span class="s1">&#39;products&#39;</span><span class="p">]</span><span class="o">=</span><span class="p">{</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span><span class="mi">2</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">react</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">facsimile  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">facsimile.SIRexample</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2022, Author.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
+    </div>
+  </body>
+</html>

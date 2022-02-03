@@ -1,0 +1,488 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>facsimile package &#8212; facsimile  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Welcome to facsimile’s API docs!" href="index.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to facsimile’s API docs!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">facsimile  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">facsimile package</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="facsimile-package">
+<h1>facsimile package<a class="headerlink" href="#facsimile-package" title="Permalink to this headline">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="module-facsimile.SIRexample">
+<span id="facsimile-sirexample-module"></span><h2>facsimile.SIRexample module<a class="headerlink" href="#module-facsimile.SIRexample" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="facsimile.SIRexample.infection">
+<span class="sig-prename descclassname"><span class="pre">facsimile.SIRexample.</span></span><span class="sig-name descname"><span class="pre">infection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0.01,</span> <span class="pre">0.001,</span> <span class="pre">0.001]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/facsimile/SIRexample.html#infection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#facsimile.SIRexample.infection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reference implementation for infection</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t</strong> – </p></li>
+<li><p><strong>y</strong> – </p></li>
+<li><p><strong>params</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><span class="math notranslate nohighlight">\(\frac{dI}{dt}=\beta I S\)</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="facsimile.SIRexample.infectionG">
+<span class="sig-prename descclassname"><span class="pre">facsimile.SIRexample.</span></span><span class="sig-name descname"><span class="pre">infectionG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/facsimile/SIRexample.html#infectionG"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#facsimile.SIRexample.infectionG" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reference:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">infection</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">params</span><span class="o">=</span><span class="p">[</span><span class="mf">1e-2</span><span class="p">,</span><span class="mf">1e-3</span><span class="p">,</span><span class="mf">1e-3</span><span class="p">]):</span>
+   <span class="n">beta</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+   <span class="n">flow</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">beta</span>
+   <span class="k">return</span> <span class="p">[</span><span class="o">-</span><span class="n">flow</span><span class="p">,</span><span class="n">flow</span><span class="p">,</span><span class="mf">0.0</span><span class="p">]</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> – </p></li>
+<li><p><strong>params</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="facsimile.SIRexample.initvalue">
+<span class="sig-prename descclassname"><span class="pre">facsimile.SIRexample.</span></span><span class="sig-name descname"><span class="pre">initvalue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zone</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/facsimile/SIRexample.html#initvalue"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#facsimile.SIRexample.initvalue" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>variable</strong> – </p></li>
+<li><p><strong>zone</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="facsimile.SIRexample.modelprocesses">
+<span class="sig-prename descclassname"><span class="pre">facsimile.SIRexample.</span></span><span class="sig-name descname"><span class="pre">modelprocesses</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/facsimile/SIRexample.html#modelprocesses"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#facsimile.SIRexample.modelprocesses" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function returns a list of dictionaries
+describing the model processes in the SIR epidemiology model</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="facsimile.SIRexample.modelprocessesG">
+<span class="sig-prename descclassname"><span class="pre">facsimile.SIRexample.</span></span><span class="sig-name descname"><span class="pre">modelprocessesG</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/facsimile/SIRexample.html#modelprocessesG"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#facsimile.SIRexample.modelprocessesG" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reder model as Gillespie</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="facsimile.SIRexample.modelprocessesO">
+<span class="sig-prename descclassname"><span class="pre">facsimile.SIRexample.</span></span><span class="sig-name descname"><span class="pre">modelprocessesO</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/facsimile/SIRexample.html#modelprocessesO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#facsimile.SIRexample.modelprocessesO" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="facsimile.SIRexample.modelspace">
+<span class="sig-prename descclassname"><span class="pre">facsimile.SIRexample.</span></span><span class="sig-name descname"><span class="pre">modelspace</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/facsimile/SIRexample.html#modelspace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#facsimile.SIRexample.modelspace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the geometry, index space</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="facsimile.SIRexample.modelvariables">
+<span class="sig-prename descclassname"><span class="pre">facsimile.SIRexample.</span></span><span class="sig-name descname"><span class="pre">modelvariables</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/facsimile/SIRexample.html#modelvariables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#facsimile.SIRexample.modelvariables" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function returns a list of dictionnaries 
+describing the Model Variables in the SIR epidemiology model
+The three variables represent the sizes of the Susceptible population
+the infected population and the recovered population</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>list of dictionaries with keys name and indices</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="facsimile.SIRexample.parameters">
+<span class="sig-prename descclassname"><span class="pre">facsimile.SIRexample.</span></span><span class="sig-name descname"><span class="pre">parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/facsimile/SIRexample.html#parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#facsimile.SIRexample.parameters" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="facsimile.SIRexample.recovery">
+<span class="sig-prename descclassname"><span class="pre">facsimile.SIRexample.</span></span><span class="sig-name descname"><span class="pre">recovery</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0.01,</span> <span class="pre">0.001,</span> <span class="pre">0.001]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/facsimile/SIRexample.html#recovery"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#facsimile.SIRexample.recovery" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reference implementation for recovery</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t</strong> – </p></li>
+<li><p><strong>y</strong> – </p></li>
+<li><p><strong>params</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="facsimile.SIRexample.recoveryG">
+<span class="sig-prename descclassname"><span class="pre">facsimile.SIRexample.</span></span><span class="sig-name descname"><span class="pre">recoveryG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/facsimile/SIRexample.html#recoveryG"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#facsimile.SIRexample.recoveryG" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reference:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">recovery</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">params</span><span class="o">=</span><span class="p">[</span><span class="mf">1e-2</span><span class="p">,</span><span class="mf">1e-3</span><span class="p">,</span><span class="mf">1e-3</span><span class="p">]):</span>
+   <span class="n">rho</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+   <span class="n">flow</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">rho</span>
+   <span class="k">return</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="n">flow</span><span class="p">,</span><span class="n">flow</span><span class="p">]</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> – </p></li>
+<li><p><strong>params</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="facsimile.SIRexample.reinfection">
+<span class="sig-prename descclassname"><span class="pre">facsimile.SIRexample.</span></span><span class="sig-name descname"><span class="pre">reinfection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0.01,</span> <span class="pre">0.001,</span> <span class="pre">0.001]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/facsimile/SIRexample.html#reinfection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#facsimile.SIRexample.reinfection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reference implementation for reinfection</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t</strong> – </p></li>
+<li><p><strong>y</strong> – </p></li>
+<li><p><strong>params</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="facsimile.SIRexample.reinfectionG">
+<span class="sig-prename descclassname"><span class="pre">facsimile.SIRexample.</span></span><span class="sig-name descname"><span class="pre">reinfectionG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/facsimile/SIRexample.html#reinfectionG"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#facsimile.SIRexample.reinfectionG" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reference:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">reinfection</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">params</span><span class="o">=</span><span class="p">[</span><span class="mf">1e-2</span><span class="p">,</span><span class="mf">1e-3</span><span class="p">,</span><span class="mf">1e-3</span><span class="p">]):</span>
+   <span class="n">beta</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+   <span class="n">flow</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">beta</span>
+   <span class="k">return</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span><span class="n">flow</span><span class="p">,</span><span class="o">-</span><span class="n">flow</span><span class="p">]</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> – </p></li>
+<li><p><strong>params</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="facsimile.SIRexample.travel">
+<span class="sig-prename descclassname"><span class="pre">facsimile.SIRexample.</span></span><span class="sig-name descname"><span class="pre">travel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/facsimile/SIRexample.html#travel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#facsimile.SIRexample.travel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Advection operator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – population in zone of interest</p></li>
+<li><p><strong>y</strong> – vector of population in all zones</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-facsimile.demo">
+<span id="facsimile-demo-module"></span><h2>facsimile.demo module<a class="headerlink" href="#module-facsimile.demo" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="facsimile.demo.assembleg">
+<span class="sig-prename descclassname"><span class="pre">facsimile.demo.</span></span><span class="sig-name descname"><span class="pre">assembleg</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/facsimile/demo.html#assembleg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#facsimile.demo.assembleg" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="facsimile.demo.runboth">
+<span class="sig-prename descclassname"><span class="pre">facsimile.demo.</span></span><span class="sig-name descname"><span class="pre">runboth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">figuresBlock</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/facsimile/demo.html#runboth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#facsimile.demo.runboth" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>figuresBlock</strong> – If true, then the plots block the function</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="facsimile.demo.simul">
+<span class="sig-prename descclassname"><span class="pre">facsimile.demo.</span></span><span class="sig-name descname"><span class="pre">simul</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/facsimile/demo.html#simul"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#facsimile.demo.simul" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-facsimile.fermi">
+<span id="facsimile-fermi-module"></span><h2>facsimile.fermi module<a class="headerlink" href="#module-facsimile.fermi" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="facsimile.fermi.fermi">
+<span class="sig-prename descclassname"><span class="pre">facsimile.fermi.</span></span><span class="sig-name descname"><span class="pre">fermi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indexvalue</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/facsimile/fermi.html#fermi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#facsimile.fermi.fermi" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>query</strong> – </p></li>
+<li><p><strong>indexvalue</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="facsimile.fermi.infrecrate">
+<span class="sig-prename descclassname"><span class="pre">facsimile.fermi.</span></span><span class="sig-name descname"><span class="pre">infrecrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zone</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/facsimile/fermi.html#infrecrate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#facsimile.fermi.infrecrate" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>zone</strong> – Metroton, Suburbium or will return a default</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-facsimile.framework">
+<span id="facsimile-framework-module"></span><h2>facsimile.framework module<a class="headerlink" href="#module-facsimile.framework" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="facsimile.framework.React">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">facsimile.framework.</span></span><span class="sig-name descname"><span class="pre">React</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">modelprocesses</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modelspace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modelvariables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initvalue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">advrate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter_query</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/facsimile/framework.html#React"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#facsimile.framework.React" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">gillespy2.core.model.Model</span></code></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="facsimile.framework.applyadv">
+<span class="sig-prename descclassname"><span class="pre">facsimile.framework.</span></span><span class="sig-name descname"><span class="pre">applyadv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">advoper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indexvalues</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/facsimile/framework.html#applyadv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#facsimile.framework.applyadv" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is an utility function to apply the advection operator to the whole model.
+It’s called by distribute only.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>advoper</strong> – </p></li>
+<li><p><strong>var</strong> – </p></li>
+<li><p><strong>indexvalues</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="facsimile.framework.bvp">
+<span class="sig-prename descclassname"><span class="pre">facsimile.framework.</span></span><span class="sig-name descname"><span class="pre">bvp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">modelprocesses</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/facsimile/framework.html#bvp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#facsimile.framework.bvp" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>modelprocesses</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="facsimile.framework.distribute_to_ode">
+<span class="sig-prename descclassname"><span class="pre">facsimile.framework.</span></span><span class="sig-name descname"><span class="pre">distribute_to_ode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dynamics</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/facsimile/framework.html#distribute_to_ode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#facsimile.framework.distribute_to_ode" title="Permalink to this definition">¶</a></dt>
+<dd><p>This functionn is the “inverse” of factorization. It takes as inputs the 2 factors, space and dynamics, and
+outputs the SIR model in ODE form.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>space</strong> – </p></li>
+<li><p><strong>dynamics</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="facsimile.framework.makeSDgraph">
+<span class="sig-prename descclassname"><span class="pre">facsimile.framework.</span></span><span class="sig-name descname"><span class="pre">makeSDgraph</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/facsimile/framework.html#makeSDgraph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#facsimile.framework.makeSDgraph" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-facsimile">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-facsimile" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">facsimile package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-facsimile.SIRexample">facsimile.SIRexample module</a></li>
+<li><a class="reference internal" href="#module-facsimile.demo">facsimile.demo module</a></li>
+<li><a class="reference internal" href="#module-facsimile.fermi">facsimile.fermi module</a></li>
+<li><a class="reference internal" href="#module-facsimile.framework">facsimile.framework module</a></li>
+<li><a class="reference internal" href="#module-facsimile">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="index.html"
+                          title="previous chapter">Welcome to facsimile’s API docs!</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/facsimile.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to facsimile’s API docs!"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">facsimile  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">facsimile package</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2022, Author.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
+    </div>
+  </body>
+</html>

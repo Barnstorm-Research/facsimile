@@ -1,0 +1,227 @@
+
+
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>facsimile.demo &#8212; facsimile  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/bizstyle.css" />
+    
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">facsimile  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">facsimile.demo</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for facsimile.demo</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">scipy.integrate</span> <span class="k">as</span> <span class="nn">SI</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">N</span>
+<span class="kn">import</span> <span class="nn">pylab</span> <span class="k">as</span> <span class="nn">P</span>
+<span class="kn">import</span> <span class="nn">gillespy2</span>
+<span class="kn">import</span> <span class="nn">facsimile.SIRexample</span> <span class="k">as</span> <span class="nn">S</span>
+<span class="kn">import</span> <span class="nn">facsimile.framework</span> <span class="k">as</span> <span class="nn">F</span>
+
+
+<div class="viewcode-block" id="simul"><a class="viewcode-back" href="../../facsimile.html#facsimile.demo.simul">[docs]</a><span class="k">def</span> <span class="nf">simul</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># model assembly</span>
+    <span class="n">modelspace</span> <span class="o">=</span> <span class="n">S</span><span class="o">.</span><span class="n">modelspace</span><span class="p">()</span>
+    <span class="n">travel</span><span class="o">=</span><span class="n">S</span><span class="o">.</span><span class="n">travel</span>
+    <span class="n">modelvariables</span><span class="o">=</span><span class="n">S</span><span class="o">.</span><span class="n">modelvariables</span><span class="p">()</span>
+    <span class="n">a</span><span class="o">=</span><span class="nb">sum</span><span class="p">([</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;implementations&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">S</span><span class="o">.</span><span class="n">modelprocesses</span><span class="p">()],[])</span>
+    <span class="n">modelprocesses</span><span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;implementation&#39;</span><span class="p">:</span><span class="n">h</span><span class="p">[</span><span class="s1">&#39;function&#39;</span><span class="p">],</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="n">h</span><span class="p">[</span><span class="s1">&#39;function&#39;</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="p">}</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">a</span> <span class="k">if</span> <span class="n">h</span><span class="p">[</span><span class="s1">&#39;moc&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;ODE&#39;</span><span class="p">]</span>
+    <span class="n">fquery</span><span class="o">=</span><span class="s1">&#39;infrecrates&#39;</span>
+    <span class="n">initvalue</span><span class="o">=</span><span class="n">S</span><span class="o">.</span><span class="n">initvalue</span>
+    
+    <span class="n">space</span><span class="o">=</span><span class="p">[</span><span class="n">modelspace</span><span class="p">,</span><span class="n">travel</span><span class="p">]</span>
+    <span class="n">dynamics</span><span class="o">=</span><span class="p">[</span><span class="n">modelvariables</span><span class="p">,</span> <span class="n">modelprocesses</span><span class="p">,</span><span class="s1">&#39;infrecrates&#39;</span><span class="p">]</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">F</span><span class="o">.</span><span class="n">distribute_to_ode</span><span class="p">(</span><span class="n">space</span><span class="p">,</span><span class="n">dynamics</span><span class="p">)</span>
+
+    <span class="c1"># simulation</span>
+    <span class="n">maxt</span><span class="o">=</span><span class="mi">100</span> <span class="c1"># maximum time of simulation</span>
+    
+    <span class="n">y0</span><span class="o">=</span><span class="p">[</span><span class="mi">1000</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1000</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1000</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">10</span><span class="p">]</span> <span class="c1"># Initial state</span>
+
+    <span class="n">y0</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+    <span class="n">mvss</span><span class="o">=</span><span class="p">[</span><span class="n">mm</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">mm</span> <span class="ow">in</span> <span class="n">modelvariables</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">modelspace</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;values&#39;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">mv</span> <span class="ow">in</span> <span class="n">mvss</span><span class="p">:</span>
+            <span class="n">y0</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">initvalue</span><span class="p">(</span><span class="n">mv</span><span class="p">,</span><span class="n">r</span><span class="p">))</span>
+    
+    <span class="n">out</span> <span class="o">=</span> <span class="n">SI</span><span class="o">.</span><span class="n">RK45</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">y0</span><span class="p">,</span><span class="n">maxt</span><span class="p">)</span>
+
+    <span class="n">tv</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+    <span class="n">yv</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span>
+    <span class="n">t</span><span class="o">=</span><span class="mi">0</span>
+    <span class="k">while</span> <span class="n">t</span><span class="o">&lt;</span> <span class="n">maxt</span><span class="p">:</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+        <span class="n">t</span><span class="o">=</span><span class="n">out</span><span class="o">.</span><span class="n">t</span>
+        <span class="n">tv</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
+        <span class="n">yv</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
+
+
+    <span class="n">c</span><span class="o">=</span><span class="p">[</span><span class="mi">95</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">P</span><span class="o">.</span><span class="n">e</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="n">t</span><span class="o">/</span><span class="mi">40</span><span class="p">))</span><span class="o">+</span><span class="mi">5</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tv</span><span class="p">]</span>
+        
+    <span class="c1"># positivity rate</span>
+    <span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">yo</span><span class="o">=</span><span class="n">yv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">to</span><span class="o">=</span><span class="n">tv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">y</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">tv</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span><span class="n">yv</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">y</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">-</span><span class="n">yo</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">-</span><span class="n">yo</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">+</span><span class="n">y</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span><span class="o">/</span><span class="p">(</span><span class="n">t</span><span class="o">-</span><span class="n">to</span><span class="p">))</span>
+        <span class="n">yo</span><span class="o">=</span><span class="n">y</span>
+        <span class="n">to</span><span class="o">=</span><span class="n">t</span>
+    <span class="n">P</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">P</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tv</span><span class="p">,</span><span class="n">p</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;infection rate (Idot)&#39;</span><span class="p">,</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">P</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tv</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">label</span><span class="o">=</span> <span class="s1">&#39;Coverage (</span><span class="si">% o</span><span class="s1">f new infections  getting tested&#39;</span><span class="p">,</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">P</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tv</span><span class="p">,[</span><span class="n">pp</span><span class="o">*</span><span class="n">cc</span><span class="o">/</span><span class="mf">100.0</span> <span class="k">for</span> <span class="p">(</span><span class="n">pp</span><span class="p">,</span><span class="n">cc</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="n">c</span><span class="p">)],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;New positive tests&#39;</span><span class="p">,</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">P</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">P</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+
+    <span class="c1"># plot results</span>
+    <span class="n">P</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">regions</span><span class="o">=</span><span class="n">space</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;values&#39;</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">regions</span><span class="p">)):</span>
+        <span class="c1">#P.figure()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dynamics</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
+            <span class="n">P</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tv</span><span class="p">,[</span><span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="n">j</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">dynamics</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">yv</span><span class="p">],</span><span class="n">label</span><span class="o">=</span> <span class="n">dynamics</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; in Province &#39;</span><span class="o">+</span><span class="n">regions</span><span class="p">[</span><span class="n">j</span><span class="p">],</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">P</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+    <span class="n">P</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">modelprocesses</span><span class="p">]))</span>
+    <span class="n">P</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">P</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">regions</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;SIR.pdf&#39;</span><span class="p">)</span>
+
+    <span class="c1"># plot results</span>
+    <span class="n">P</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">regions</span><span class="o">=</span><span class="n">space</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;values&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">]:</span>
+
+        <span class="c1">#P.figure()</span>
+
+            <span class="n">P</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tv</span><span class="p">,[</span><span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="n">j</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">dynamics</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">yv</span><span class="p">],</span><span class="n">label</span><span class="o">=</span> <span class="n">dynamics</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; in Province &#39;</span><span class="o">+</span><span class="n">regions</span><span class="p">[</span><span class="n">j</span><span class="p">],</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">P</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+    <span class="n">P</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">modelprocesses</span><span class="p">]))</span>
+    <span class="n">P</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">P</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;SIRGcolors.png&#39;</span><span class="p">)</span>
+
+    <span class="c1"># plot results</span>
+    <span class="c1">#P.figure()</span>
+    <span class="c1">#for i in [1,2,0]:</span>
+    <span class="c1">#    for j in [1,0]:</span>
+    <span class="c1">#        P.plot(tv,[y[i+j*len(dynamics[0])] for y in yv],label= dynamics[0][i] + &#39; in Province &#39;+space[0][j],linewidth=4)</span>
+    <span class="c1">#        P.grid()</span>
+    <span class="c1">#        P.legend()</span>
+    <span class="c1">#    P.savefig(space[0][j]+&#39;SIR.pdf&#39;)</span>
+    <span class="c1">#P.close()</span>
+    <span class="k">return</span> <span class="n">model</span><span class="p">,</span><span class="n">tv</span><span class="p">,</span><span class="n">yv</span></div>
+
+<div class="viewcode-block" id="assembleg"><a class="viewcode-back" href="../../facsimile.html#facsimile.demo.assembleg">[docs]</a><span class="k">def</span> <span class="nf">assembleg</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">advrate</span><span class="o">=</span><span class="mf">1e-4</span>
+    <span class="c1">#modelprocesses=[p[&#39;implementation&#39;] for p in S.getprocessimplementation(&#39;Gillespie&#39;)]</span>
+    <span class="n">a</span><span class="o">=</span><span class="nb">sum</span><span class="p">([</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;implementations&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">S</span><span class="o">.</span><span class="n">modelprocesses</span><span class="p">()],[])</span>
+    <span class="n">modelprocesses</span><span class="o">=</span> <span class="p">[</span><span class="n">h</span><span class="p">[</span><span class="s1">&#39;function&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">a</span> <span class="k">if</span> <span class="n">h</span><span class="p">[</span><span class="s1">&#39;moc&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;Gillespie&#39;</span><span class="p">]</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">React</span><span class="p">(</span><span class="n">modelprocesses</span><span class="p">,</span><span class="n">S</span><span class="o">.</span><span class="n">modelspace</span><span class="p">,</span><span class="n">S</span><span class="o">.</span><span class="n">modelvariables</span><span class="p">,</span><span class="n">S</span><span class="o">.</span><span class="n">initvalue</span><span class="p">,</span><span class="n">advrate</span><span class="p">,</span><span class="n">parameter_query</span><span class="o">=</span><span class="s1">&#39;infrecrates&#39;</span><span class="p">)</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">number_of_trajectories</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">results</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+    <span class="n">P</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+    <span class="n">P</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">f</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">S</span><span class="o">.</span><span class="n">modelprocessesG</span><span class="p">()]))</span>
+    <span class="n">P</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;SIRG.png&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">results</span><span class="p">,</span> <span class="n">model</span></div>
+
+
+
+<div class="viewcode-block" id="runboth"><a class="viewcode-back" href="../../facsimile.html#facsimile.demo.runboth">[docs]</a><span class="k">def</span> <span class="nf">runboth</span><span class="p">(</span><span class="n">figuresBlock</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :param figuresBlock: If true, then the plots block the function</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">P</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">)</span>
+    <span class="n">simul</span><span class="p">()</span>
+    <span class="n">fsize</span><span class="o">=</span><span class="n">P</span><span class="o">.</span><span class="n">gcf</span><span class="p">()</span><span class="o">.</span><span class="n">get_size_inches</span><span class="p">()</span>
+    <span class="n">assembleg</span><span class="p">()</span>
+    <span class="n">P</span><span class="o">.</span><span class="n">gcf</span><span class="p">()</span><span class="o">.</span><span class="n">set_size_inches</span><span class="p">(</span><span class="n">fsize</span><span class="p">)</span>
+    <span class="n">P</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="n">figuresBlock</span><span class="p">)</span></div>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;facsimile demo. Running both simulations:&quot;</span><span class="p">)</span>
+    <span class="n">runboth</span><span class="p">(</span><span class="n">figuresBlock</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Good-bye&quot;</span><span class="p">)</span>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">facsimile  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">facsimile.demo</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2022, Author.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
+    </div>
+  </body>
+</html>
