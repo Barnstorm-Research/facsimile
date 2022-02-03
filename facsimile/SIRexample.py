@@ -77,7 +77,7 @@ def infection(t,y,params=[1e-2,1e-3,1e-3]):
     :param y:
     :param params:
     :return:
-    :math:$\frac{dI}{dt}=\beta I S
+    :math:$\frac{dI}{dt}=\beta I S$
     """
     beta = params[0]
     flow=y[0]*y[1]*beta
