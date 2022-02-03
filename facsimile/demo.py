@@ -15,7 +15,8 @@ def simul():
     modelspace = S.modelspace()
     travel=S.travel
     modelvariables=S.modelvariables()
-    modelprocesses=S.getprocessimplementation('ODE')
+    a=sum([f['implementations'] for f in S.modelprocesses()],[])
+    modelprocesses= [{'implementation':h['function'],'name':h['function'].__name__} for h in a if h['moc']=='ODE']
     fquery='infrecrates'
     initvalue=S.initvalue
     
@@ -107,7 +108,9 @@ def assembleg():
     :return:
     """
     advrate=1e-4
-    modelprocesses=[p['implementation'] for p in S.getprocessimplementation('Gillespie')]
+    #modelprocesses=[p['implementation'] for p in S.getprocessimplementation('Gillespie')]
+    a=sum([f['implementations'] for f in S.modelprocesses()],[])
+    modelprocesses= [h['function'] for h in a if h['moc']=='Gillespie']
     model = F.React(modelprocesses,S.modelspace,S.modelvariables,S.initvalue,advrate,parameter_query='infrecrates')
     results = model.run(number_of_trajectories=10)
     results.plot()

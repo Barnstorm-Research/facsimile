@@ -19,8 +19,11 @@ import gillespy2
 
 def modelvariables():
     """
-
-    :return:
+    This function returns a list of dictionnaries 
+    describing the Model Variables in the SIR epidemiology model
+    The three variables represent the sizes of the Susceptible population
+    the infected population and the recovered population
+    :return: list of dictionaries with keys name and indices
     """
     mv=list()
     for v in  ['S','I','R']:
@@ -46,57 +49,35 @@ def modelprocessesO():
 
 def modelprocesses():
     """
-
+    This function returns a list of dictionaries
+    describing the model processes in the SIR epidemiology model
     :return:
     """
     mps=list()
-    for p in [infection,recovery,reinfection]:
+    for (po,pg) in zip([infection,recovery,reinfection],[infectionG,recoveryG,reinfectionG]):
         mp=dict()
-        mp['name']=p.__name__
+        mp['name']=po.__name__
         mp['implementations']=list()
         source='reference'
-        for moc in ['ODE','Stochastic','PDE']:
+        for (moc,fun)  in zip(['ODE','Gillespie'],[po,pg]):
             imp=dict()
-            imp={'source':source,'moc':moc}
+            imp={'source':source,'moc':moc,'function':fun}
             mp['implementations'].append(imp)
             source='translated'
         mp['indices']=['Region']
         mps.append(mp)
     return mps
 
-def getprocessimplementation(moc):
-    """
-
-    :param moc:
-    :return:
-    """
-    if moc=='ODE':
-        mps=list()
-        for p in [infection,recovery,reinfection]:
-            mp=dict()
-            mp['name']=p.__name__
-            mp['implementation']=p
-            mp['indices']=['Region']
-            mps.append(mp)
-        return mps
-    elif moc=="Gillespie":
-        mps=list()
-        for p in [infectionG,recoveryG,reinfectionG]:
-            mp=dict()
-            mp['name']=p.__name__
-            mp['implementation']=p
-            mp['indices']=['Region']
-            mps.append(mp)
-        return mps
 
 
 def infection(t,y,params=[1e-2,1e-3,1e-3]):
     """
-    Reference implementation for implementation
+    Reference implementation for infection
     :param t:
     :param y:
     :param params:
     :return:
+    :math:$\frac{dI}{dt}=\beta I S
     """
     beta = params[0]
     flow=y[0]*y[1]*beta
