@@ -144,7 +144,13 @@ The workflow for ODE based simulation proceeds in the following steps:
 
 
 #### Results
-![ODE Sim](docs/figs/SIRODE.png)
+With the original model (no reinfection)
+
+![ODE Sim](docs/figs/SIRODE2.png)
+
+With the composed model
+
+![ODE Sim](docs/figs/SIRODE3.png)
 
 ### Gillespie algorithm stochastic simulation
 
