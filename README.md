@@ -71,7 +71,7 @@ The workflow for ODE based simulation proceeds in the following steps:
 
 #### ODE process implementations
 
-The ODE renderer uses the reference implementation provided for eachof the three processes (infection, recovery, reinfection)
+The ODE renderer uses the reference implementation provided for each of the three processes (infection, recovery, reinfection)
 
 ```
 def infection(t,y,params=[1e-2,1e-3,1e-3]):
