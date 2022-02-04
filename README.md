@@ -62,10 +62,26 @@ To execute both simulations:
 ```
 
 
-## Simulation Using ODE
+## Example Workflows
+
+### ODE based Simulation
+
+The workflow for ODE based simulation proceeds in the following steps:
+
+1. Assemble space, dynamics and parameters factors into a model suitable for  ODE simulation: `model=F.distribute_to_ode(SIRspace,SIRdyn,SIRparams)`
+1. Select initial conditions `y0` and simulation end time `maxt`
+1. Attach the model to a Runge Kutta engine: `out = SI.RK45(model,0,y0,maxt)`
+1. Simulate and plot the results
 
 ![ODE Sim](docs/figs/SIRODE.png)
 
-## Simulation using Gillespie
+### Gillespie algorithm stochastic simulation
+
+The workflow for stochastic simulation is analogous as ODE:
+
+1. Select initial conditions `y0` and simulation end time `maxt`
+1. Assemble space, dynamics and parameters factors into a model suitable for stochastic simulation: `model = F.Distribute_to_gillespie(SIRdyn,SIRspace,SIRparameters,y0,maxt)`
+1. Simulate and plot 10 stochastic runs (the gillespie model includes a simulation engine) `    results = model.run(number_of_trajectories=10)`
+
 
 ![Gillespie Sim](docs/figs/SIRG.png)
