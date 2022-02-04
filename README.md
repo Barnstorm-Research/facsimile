@@ -129,7 +129,7 @@ def recovery(t,y,params=[1e-2,1e-3,1e-3]):
 ```
 
 Which yields the following diagram
-![](docs/figs/facgraph2.png)
+![](docs/figs/facgraph3.png)
 
 ### ODE based Simulation
 
