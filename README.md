@@ -12,7 +12,7 @@ To execute both simulations:
 
 ### SIR FACTORS
 
-#### Dynamics
+#### Dynamics (`SIRdyn`)
 ```
 {'Processes': [{'implementations': [{'function': <function infection at 0x130a083a0>,
                                      'moc': 'ODE',
@@ -44,14 +44,14 @@ To execute both simulations:
 
 ```
 
-#### Space
+#### Space (`SIRspace`)
 ```
 {'Advections': {'Region': {'implementation': <function travel at 0x130a08700>,
                            'name': 'Travel'}},
  'Indices': [{'name': 'Region',
               'values': ['Metroton', 'Suburbium', 'Ruralia']}]}
 ```
-#### Parameters
+#### Parameters (`SIRparameters`)
 ```
 {'Parameters': [{'implementation': <function get_parameters_factor.<locals>.<lambda> at 0x1052a39d0>,
                  'name': 'Infection_rate'},
