@@ -4,7 +4,7 @@ import numpy as N
 import pylab as P
 import gillespy2
 import facsimile.fermi as fermi
-
+import pprint
 
 class DynamicsFactor:
     ''' 
@@ -15,6 +15,11 @@ class DynamicsFactor:
         self.processes = []
         self.variables = []
 
+    def __repr__(self):
+        return repr({'Variables':self.variables,'Processes':self.processes})
+    def __str__(self):
+                return pprint.pformat({'Variables':self.variables,'Processes':self.processes})
+    
     def add_variable(self,name,indices=[]):
         self.variables.append({'name':name,'indices':indices})
         return
@@ -49,6 +54,12 @@ class SpaceFactor:
         self.indices = []
         self.advections = {}
 
+    def __repr__(self):
+        return repr({'Indices':self.indices,'Advections':self.advections})
+    def __str__(self):
+                return pprint.pformat({'Indices':self.indices,'Advections':self.advections})
+
+
     def add_index(self,name,values):
         self.indices.append({'name':name,'values':values})
         return
@@ -73,10 +84,16 @@ class ParameterFactor:
     def __init__(self):
         self.parameters = []
 
+    def __repr__(self):
+        return repr({'Parameters':self.parameters})
+    def __str__(self):
+                return pprint.pformat({'Parameters':self.parameters})
+    
+
     def add_parameter(self,name,fun):
         self.parameters.append({'name':name,'implementation':fun})
 
-    def get_parameters():
+    def get_parameters(self):
         return self.parameters
 
 
@@ -85,7 +102,7 @@ class ParameterFactor:
 # FRAMEWORK FUNCTIONS
 #######################################################
 
-def distribute_to_ode(space,dynamics,fquery):
+def distribute_to_ode(space,dynamics,parameters):
     """
     This functionn is the "inverse" of factorization. It takes as inputs the 2 factors, space and dynamics, and
     outputs the SIR model in ODE form.
@@ -100,7 +117,14 @@ def distribute_to_ode(space,dynamics,fquery):
     var = [vv['name'] for vv in dynamics.variables]
 
     dynv= [p['implementation'] for p in dynamics.get_processes('ODE')]
-    paramf=lambda indexv : fermi.fermi(fquery,indexv)
+    
+    #paramf=lambda indexv : fermi.fermi(fquery,indexv)
+
+    params=parameters.get_parameters()
+    def paramf(indexv):
+        return [p['implementation'](indexv)  for p in params ]
+
+
     mapfun = lambda l : lambda t,y :  dyn(t,y,l)
     redfun=lambda f1,f2: lambda t,x : f1(t,x[:-len(var)])+f2(t,x[-len(var):])
 
@@ -173,7 +197,7 @@ def bvp(modelprocesses):
 
 class React(gillespy2.Model):
 
-    def __init__(self, dynfactor,spacefactor,initvalue,advrate,parameter_query=None):
+    def __init__(self, dynfactor,spacefactor,parfactor,initvalue):
         """
 
         :param modelprocesses:
@@ -187,13 +211,23 @@ class React(gillespy2.Model):
 
         modelspace=spacefactor.get_space
         modelvariables=dynfactor.get_variables
+
+        # TODO
+        # This is valid only for one index
+        # simple advection
+        index0=spacefactor.indices[0]['name']
+        advrate=spacefactor.advections[index0]['implementation'](1,[0])
+
         #
         # Parameters from FERMI
         #
         paramd=dict()
+        params=parfactor.get_parameters()
+
         for r in modelspace()[0]['values']:
             parameters = list()
-            prates= fermi.fermi(parameter_query,r)
+            #prates= fermi.fermi(parameter_query,r)
+            prates=[p['implementation'](r)  for p in params ]
             for i in range(len(prates)):
                 parameters.append(gillespy2.Parameter(
                     name='k_c'+str(i)+r, expression=prates[i]))

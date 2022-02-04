@@ -14,8 +14,18 @@ def simul_o():
 
     SIRdyn=S.get_dynamics_factor()
     SIRspace=S.get_space_factor()
+    SIRparams=S.get_parameters_factor()
 
-    model=F.distribute_to_ode(SIRspace,SIRdyn,'infrecrates')
+    print(SIRdyn)
+    print(SIRspace)
+    print(SIRparams)
+
+
+
+
+    model=F.distribute_to_ode(SIRspace,SIRdyn,SIRparams)
+
+
 
     # simulation
     y0=list()
@@ -70,12 +80,15 @@ def simul_g():
 
     :return:
     """
-    advrate=1e-4
+
 
 
     SIRdyn=S.get_dynamics_factor()
     SIRspace=S.get_space_factor()
-    model = F.React(SIRdyn,SIRspace,S.initvalue,advrate,parameter_query='infrecrates')
+    SIRparameters=S.get_parameters_factor()
+
+    model = F.React(SIRdyn,SIRspace,SIRparameters,S.initvalue)
+
     results = model.run(number_of_trajectories=10)
     results.plot()
     P.grid()
@@ -92,9 +105,9 @@ def runboth(figuresBlock=True):
     :return:
     """
     P.close('all')
-    simul()
+    simul_o()
     fsize=P.gcf().get_size_inches()
-    assembleg()
+    simul_g()
     P.gcf().set_size_inches(fsize)
     P.show(block=figuresBlock)
 

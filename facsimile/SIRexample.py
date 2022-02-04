@@ -1,5 +1,6 @@
 from typing import List
 from facsimile import framework as F
+import facsimile.fermi as fermi
 import scipy.integrate as SI
 import numpy as N
 import pylab as P
@@ -64,12 +65,12 @@ def initvalue(variable,zone):
     return iv
 
 
-def get_params_factor():
+def get_parameters_factor():
     
     SIRparams=F.ParameterFactor()
-    SIRparams.add_param('Infection_rate',lambda zone: infrecrate(zone)[0])
-    SIRparams.add_param('Recovery_rate',lambda zone: infrecrate(zone)[1])
-    SIRparams.add_param('Reinfection_rate',lambda zone: infrecrate(zone)[2])
+    SIRparams.add_parameter('Infection_rate',lambda zone: fermi.fermi('infrecrates',zone)[0])
+    SIRparams.add_parameter('Recovery_rate',lambda zone: fermi.fermi('infrecrates',zone)[1])
+    SIRparams.add_parameter('Reinfection_rate',lambda zone: fermi.fermi('infrecrates',zone)[2])
     return SIRparams
 
 
