@@ -1,13 +1,7 @@
 # Facsimile 0.1
 
-To execute both simulations:
-
-1. Ensure you have created and activated the conda environment from `environment.yml`
-2. Run from the repo folder: `python -m facsimile.demo`
-
-
-
-## EXAMPLE SIR Model
+# Sample models and Workflows
+## SIR Model
 ![](docs/figs/SIRFactoredModel.png)
 
 ### SIR FACTORS
@@ -211,3 +205,13 @@ def reinfectionG(y,params):
 
 #### Results
 ![Gillespie Sim](docs/figs/SIRG.png)
+
+# Workflow Execution
+
+To execute both simulations:
+
+1. Ensure you have created and activated the conda environment from `environment.yml`
+2. Run from the repo folder: `python -m facsimile.demo`
+
+
+
