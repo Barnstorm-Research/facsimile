@@ -16,12 +16,12 @@ Dynamics Factor
 
 '''
 
-def get_dynamics_factor():
+def get_dynamics_factor(nproc=3):
     sir_df=F.DynamicsFactor()
     for v in  ['S','I','R']:
         sir_df.add_variable(v,'Region')
     
-    for (po,pg) in zip([infection,recovery,reinfection],[infectionG,recoveryG,reinfectionG]):
+    for (po,pg) in zip([infection,recovery,reinfection][:nproc],[infectionG,recoveryG,reinfectionG][:nproc]):
         mp=dict()
         mp['name']=po.__name__
         mp['implementations']=list()

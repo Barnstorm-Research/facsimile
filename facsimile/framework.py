@@ -195,9 +195,9 @@ def bvp(modelprocesses):
 
 
 
-class React(gillespy2.Model):
+class Distribute_to_gillespie(gillespy2.Model):
 
-    def __init__(self, dynfactor,spacefactor,parfactor,initvalue):
+    def __init__(self, dynfactor,spacefactor,parfactor,initvalue,maxt):
         """
 
         :param modelprocesses:
@@ -280,15 +280,16 @@ class React(gillespy2.Model):
         self.add_reaction(reactions)
         
         # Set the timespan for the simulation.
-        self.timespan(P.linspace(0, 100, 101))
+        self.timespan(P.linspace(0, maxt, maxt+1))
 
 
-def makeSDgraph():
+def makeSDgraph(filename,spacefactor,dynfactor,parfactor):
     """
 
     :return:
     """
-    with open('testSD.dot','w') as f:
+    mss=spacefactor.indices
+    with open(filename+'.dot','w') as f:
         f.write('digraph test { \n')
         f.write('rankdir=TP \n')
         f.write('forcelabels=true compound=true\n')
@@ -302,7 +303,7 @@ def makeSDgraph():
         f.write('subgraph clusterspace { \n')
         f.write('label = SPACE_Factor  \n')
         f.write('rankdir=LR \n')
-        mss=modelspace()
+        #mss=modelspace()
         start=True
         for l in mss:
             f.write('subgraph cluster'+l['name']+' {label ="'+l['name']+'"\n')
@@ -331,7 +332,7 @@ def makeSDgraph():
         f.write('label = Parameters_Factor  \n')
         f.write('paramsa '+' [label="",style=invis,width=0] \n')
         f.write(lo+' -> '+'paramsa [style=invis]\n')
-        for l in parameters():
+        for l in parfactor.parameters:
             f.write(l['name']+' [shape=box, fontsize=10, label='+l['name']+' ] \n')
         f.write('}')
         
@@ -339,17 +340,19 @@ def makeSDgraph():
         f.write('label = DYNAMICS_Factor  \n')
         f.write('subgraph clusterEmpty  { \n')
         f.write('label = "Diagram" \n fontcolor = black \n')
-        mv=modelvariables()
-        for l in modelvariables():
+        mv=dynfactor.variables
+        for l in mv:
             f.write(l['name']+' [shape=box, fontsize=10,label=<'+l['name']+\
                     '<BR /><FONT POINT-SIZE="5">'+ \
                     ', '.join(l['indices'])+ '</FONT>> ] \n')
 
         #pv=[p['name'] for p in modelprocessesO()]
-        for p in modelprocessesO():
+        #for p in modelprocessesO():
+        indlist=[a['indices'] for a in dynfactor.get_processes()]
+        for p,indices  in zip(dynfactor.get_processes('ODE'),indlist):
             f.write(p['name']+' [shape=oval, fontsize=10,label=<'+p['name']+\
                     '<BR /><FONT POINT-SIZE="5">'+ \
-                    ', '.join(p['indices'])+ '</FONT>> ] \n')
+                    ', '.join(indices)+ '</FONT>> ] \n')
             d=p['implementation'](0,[1 for x in range(len(mv))])
             sources = [i for i in range(len(d)) if d[i]<0]
             dest = [i for i in range(len(d)) if d[i]>0]
@@ -361,7 +364,7 @@ def makeSDgraph():
         f.write('subgraph clusterImplementations  { \n')
         f.write('label = "Implementations" \n fontcolor = black \n')
         start=True
-        for p in modelprocesses():
+        for p in dynfactor.processes:
             mocs=[','.join([pm['moc'],pm['source'],'<BR />']) for pm in p['implementations']]
             f.write(p['name']+'i [shape=oval, fontsize=10,label=<'+p['name']+\
                     '<BR /><FONT POINT-SIZE="5">'+ \

@@ -86,8 +86,9 @@ def simul_g():
     SIRdyn=S.get_dynamics_factor()
     SIRspace=S.get_space_factor()
     SIRparameters=S.get_parameters_factor()
-
-    model = F.React(SIRdyn,SIRspace,SIRparameters,S.initvalue)
+    y0=S.initvalue
+    maxt=100
+    model = F.Distribute_to_gillespie(SIRdyn,SIRspace,SIRparameters,y0,maxt)
 
     results = model.run(number_of_trajectories=10)
     results.plot()
