@@ -24,61 +24,14 @@
                                      'moc': 'Gillespie',
                                      'source': 'translated'}],
                 'indices': ['Region'],
-                'name': 'recovery'},
-               {'implementations': [{'function': <function reinfection at 0x130a084c0>,
-                                     'moc': 'ODE',
-                                     'source': 'reference'},
-                                    {'function': <function reinfectionG at 0x130a08670>,
-                                     'moc': 'Gillespie',
-                                     'source': 'translated'}],
-                'indices': ['Region'],
-                'name': 'reinfection'}],
+                'name': 'recovery'}],
  'Variables': [{'indices': 'Region', 'name': 'S'},
                {'indices': 'Region', 'name': 'I'},
                {'indices': 'Region', 'name': 'R'}]}
 
 ```
 
-#### Space (`SIRspace`)
-```
-{'Advections': {'Region': {'implementation': <function travel at 0x130a08700>,
-                           'name': 'Travel'}},
- 'Indices': [{'name': 'Region',
-              'values': ['Metroton', 'Suburbium', 'Ruralia']}]}
-```
-#### Parameters (`SIRparameters`)
-```
-{'Parameters': [{'implementation': <function get_parameters_factor.<locals>.<lambda> at 0x1052a39d0>,
-                 'name': 'Infection_rate'},
-                {'implementation': <function get_parameters_factor.<locals>.<lambda> at 0x1052b8ee0>,
-                 'name': 'Recovery_rate'},
-                {'implementation': <function get_parameters_factor.<locals>.<lambda> at 0x154e70f70>,
-                 'name': 'Reinfection_rate'}]}
-```
-
-### Model Diagram
-A model diagram can be generated from the model factors with: 
-`F.makeSDgraph('graphname',space_factor,dynamics_factor,parameters_factor)`
-
-![](docs/figs/facgraph2.png)
-
-## Example Workflows
-
-### ODE based Simulation
-
-#### Workflow
-
-The workflow for ODE based simulation proceeds in the following steps:
-
-1. Assemble space, dynamics and parameters factors into a model suitable for  ODE simulation: `model=F.distribute_to_ode(SIRspace,SIRdyn,SIRparams)`
-1. Select initial conditions `y0` and simulation end time `maxt`
-1. Attach the model to a Runge Kutta engine: `out = SI.RK45(model,0,y0,maxt)`
-1. Simulate and plot the results
-
-#### ODE process implementations
-
-The ODE renderer uses the reference implementation provided for each of the three processes (infection, recovery, reinfection)
-
+#### Reference Implementations
 ```
 def infection(t,y,params=[1e-2,1e-3,1e-3]):
     r"""                                                                                          
@@ -114,7 +67,50 @@ def recovery(t,y,params=[1e-2,1e-3,1e-3]):
     rho=params[1]
     flow = y[1]*rho
     return [0.0, -flow,flow]
-def reinfection(t,y,params=[1e-2,1e-3,1e-3]):
+```
+#### Space (`SIRspace`)
+```
+{'Advections': {'Region': {'implementation': <function travel at 0x130a08700>,
+                           'name': 'Travel'}},
+ 'Indices': [{'name': 'Region',
+              'values': ['Metroton', 'Suburbium', 'Ruralia']}]}
+```
+#### Parameters (`SIRparameters`)
+```
+{'Parameters': [{'implementation': <function get_parameters_factor.<locals>.<lambda> at 0x1052a39d0>,
+                 'name': 'Infection_rate'},
+                {'implementation': <function get_parameters_factor.<locals>.<lambda> at 0x1052b8ee0>,
+                 'name': 'Recovery_rate'},
+                {'implementation': <function get_parameters_factor.<locals>.<lambda> at 0x154e70f70>,
+                 'name': 'Reinfection_rate'}]}
+```
+
+### Model Diagram
+A model diagram can be generated from the model factors with: 
+`F.makeSDgraph('graphname',space_factor,dynamics_factor,parameters_factor)`
+
+![](docs/figs/facgraph2.png)
+
+## Example Workflows
+
+### Compose models
+
+We can add an additional process to the model, by providing its implementations. For example we add a reinfection process, defined as
+
+
+```
+               {'implementations': [{'function': <function reinfection at 0x130a084c0>,
+                                     'moc': 'ODE',
+                                     'source': 'reference'},
+                                    {'function': <function reinfectionG at 0x130a08670>,
+                                     'moc': 'Gillespie',
+                                     'source': 'translated'}],
+                'indices': ['Region'],
+                'name': 'reinfection'}
+```
+via its implementations
+```
+def recovery(t,y,params=[1e-2,1e-3,1e-3]):
     r"""                                                                                          
     Reference implementation for recovery                                                         
                                                                                                   
@@ -124,15 +120,29 @@ def reinfection(t,y,params=[1e-2,1e-3,1e-3]):
     :return: list with contributions of recovery process to S, I, R derivatives                   
                                                                                                   
     :math:'\frac{dS}{dt}=0'                                                                       
-    :math:'\frac{dI}{dt}=\beta I S'                                                               
-    :math:'\frac{dR}{dt}=-\beta I R'                                                              
-                                                                                                  
+    :math:'\frac{dI}{dt}=-\rho I'                                                                 
+    :math:'\frac{dR}{dt}=\rho I'                                                                                                                                                         
     """
-    beta = params[2]
-    flow=y[1]*y[2]*beta
-    return [0.0,flow,-flow]
-
+    rho=params[1]
+    flow = y[1]*rho
+    return [0.0, -flow,flow]
 ```
+
+Which yields the following diagram
+![](docs/figs/facgraph2.png)
+
+### ODE based Simulation
+
+#### Workflow
+
+The workflow for ODE based simulation proceeds in the following steps:
+
+1. Assemble space, dynamics and parameters factors into a model suitable for  ODE simulation: `model=F.distribute_to_ode(SIRspace,SIRdyn,SIRparams)`
+1. Select initial conditions `y0` and simulation end time `maxt`
+1. Attach the model to a Runge Kutta engine: `out = SI.RK45(model,0,y0,maxt)`
+1. Simulate and plot the results
+
+
 #### Results
 ![ODE Sim](docs/figs/SIRODE.png)
 
