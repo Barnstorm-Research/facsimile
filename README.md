@@ -18,7 +18,7 @@ representation for describing, composing, and refining scientific models and con
 # Sample models and Workflows
 
 The following example demonstrates some of the FACSIMILE capabilities, such as model factoring, model rendering, model composition and multi model-of-computation 
-workfloes.
+workflows.
 
 ## SIR Model
 
