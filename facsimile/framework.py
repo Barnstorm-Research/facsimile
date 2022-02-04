@@ -6,12 +6,86 @@ import gillespy2
 import facsimile.fermi as fermi
 
 
+class DynamicsFactor:
+    ''' 
+    Hold the data for a dynamic factor
+    '''
+    
+    def __init__(self):
+        self.processes = []
+        self.variables = []
+
+    def add_variable(self,name,indices=[]):
+        self.variables.append({'name':name,'indices':indices})
+        return
+    def add_process(self, name,source,moc,fun,indices=[]):
+        names=[p['name'] for p in self.processes]
+        imp={'source':source,'moc':moc,'function':fun}
+        if name in names:
+            i=names.index(name)
+            self.processes[i]['implementations'].append(imp)
+        else:
+            self.processes.append({'name':name,'implementations':[imp],'indices':indices})
+
+        return
+
+    def get_variables(self):
+        return self.variables
+    def get_processes(self,moc=[]):
+        if not moc:
+            return self.processes
+        else:
+            a=sum([f['implementations'] for f in self.processes],[])
+            return  [{'implementation':h['function'],\
+                              'name':h['function'].__name__} for h in a if h['moc']==moc]
+
+
+class SpaceFactor:
+    ''' 
+    Hold the data for a dynamic factor
+    '''
+    
+    def __init__(self):
+        self.indices = []
+        self.advections = {}
+
+    def add_index(self,name,values):
+        self.indices.append({'name':name,'values':values})
+        return
+    def add_advection(self, name,index ,fun):
+        self.advections[index]={'name':name,'implementation':fun}
+        return
+
+    def get_space(self):
+        space=[]
+        for ind in self.indices:
+            if ind['name'] in self.advections:
+                ind['advection']=self.advections[ind['name']]
+            space.append(ind)
+        return space
+
+
+class ParameterFactor:
+    ''' 
+    Hold the data for a dynamic factor
+    '''
+    
+    def __init__(self):
+        self.parameters = []
+
+    def add_parameter(self,name,fun):
+        self.parameters.append({'name':name,'implementation':fun})
+
+    def get_parameters():
+        return self.parameters
+
+
 
 #######################################################
 # FRAMEWORK FUNCTIONS
 #######################################################
 
-def distribute_to_ode(space,dynamics):
+def distribute_to_ode(space,dynamics,fquery):
     """
     This functionn is the "inverse" of factorization. It takes as inputs the 2 factors, space and dynamics, and
     outputs the SIR model in ODE form.
@@ -19,13 +93,14 @@ def distribute_to_ode(space,dynamics):
     :param dynamics:
     :return:
     """
-    indexvalues = space[0][0]['values']
 
-    advoper = space[1]
-    var = [vv['name'] for vv in dynamics[0]]
+    # TODO: This assumes one index only
+    indexvalues = space.get_space()[0]['values']
+    advoper = space.get_space()[0]['advection']['implementation']
+    var = [vv['name'] for vv in dynamics.variables]
 
-    dynv= [p['implementation'] for p in dynamics[1]]
-    paramf=lambda indexv : fermi.fermi(dynamics[2],indexv)
+    dynv= [p['implementation'] for p in dynamics.get_processes('ODE')]
+    paramf=lambda indexv : fermi.fermi(fquery,indexv)
     mapfun = lambda l : lambda t,y :  dyn(t,y,l)
     redfun=lambda f1,f2: lambda t,x : f1(t,x[:-len(var)])+f2(t,x[-len(var):])
 
@@ -98,7 +173,7 @@ def bvp(modelprocesses):
 
 class React(gillespy2.Model):
 
-    def __init__(self, modelprocesses,modelspace,modelvariables,initvalue,advrate,parameter_query=None):
+    def __init__(self, dynfactor,spacefactor,initvalue,advrate,parameter_query=None):
         """
 
         :param modelprocesses:
@@ -110,6 +185,8 @@ class React(gillespy2.Model):
         """
         gillespy2.Model.__init__(self, name='Gillespie')
 
+        modelspace=spacefactor.get_space
+        modelvariables=dynfactor.get_variables
         #
         # Parameters from FERMI
         #
@@ -129,6 +206,7 @@ class React(gillespy2.Model):
         #
         # Model Variables
         #
+    
         speciesd=dict()
         for r in modelspace()[0]['values']:
             species=list()
@@ -139,8 +217,10 @@ class React(gillespy2.Model):
         #
         # Processes and Advection
         #
+        
         reactions=list()
         i=0
+        modelprocesses=[f['implementation'] for f in dynfactor.get_processes('Gillespie')]
         for r in modelspace()[0]['values']:
             species=speciesd[r]
             parameters=paramd[r]
