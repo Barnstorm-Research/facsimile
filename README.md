@@ -150,6 +150,22 @@ def recovery(t,y,params=[1e-2,1e-3,1e-3]):
 Which yields the following diagram
 ![](docs/figs/facgraph3.png)
 
+It is equally easy to extend the space model. WE can add two addtional regions:
+```
+{'Advections': {'Region': {'implementation': <function travel at 0x2ae6b8550>,
+                           'name': 'Travel'}},
+ 'Indices': [{'name': 'Region',
+              'values': ['Metroton',
+                         'Suburbium',
+                         'Ruralia',
+                         'Westcosta',
+                         'Islandii']}]}
+ ```
+ 
+ Which yields the following diagram:
+ 
+![](docs/figs/SIR5regions.png)
+
 ### ODE based Simulation
 
 #### Workflow
@@ -170,6 +186,8 @@ With the original model (no reinfection)
 With the composed model
 
 ![ODE Sim](docs/figs/SIRODE3.png)
+
+
 
 ### Gillespie algorithm stochastic simulation
 
