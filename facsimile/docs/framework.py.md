@@ -10,7 +10,7 @@
 
 ---
 
-<a href="../../facsimile/framework.py#L105"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L135"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `distribute_to_ode`
 
@@ -18,12 +18,23 @@
 distribute_to_ode(space, dynamics, parameters)
 ```
 
-This functionn is the "inverse" of factorization. It takes as inputs the 2 factors, space and dynamics, and outputs the SIR model in ODE form. :param space: :param dynamics: :return: 
+ This function is the "inverse" of factorization. It takes as inputs 3 factors, space,  dynamics and parameters, and outputs the SIR model in ODE form suitable to be  integrated with scipy.Integrate methods 
+
+**Args:**
+ 
+ - <b>`space`</b>:  Space Factor (framework.SpaceFator) 
+ - <b>`dynamics`</b>:  Dynamics Factor 
+
+**Returns:**
+ 
+ - <b>`model`</b>:  ODE function with the signature expected by scipy integrate 
+
+
 
 
 ---
 
-<a href="../../facsimile/framework.py#L136"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L169"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `applyadv`
 
@@ -31,12 +42,12 @@ This functionn is the "inverse" of factorization. It takes as inputs the 2 facto
 applyadv(advoper, var, indexvalues)
 ```
 
-This is an utility function to apply the advection operator to the whole model. It's called by distribute only. :param advoper: :param var: :param indexvalues: :return: 
+This is an utility function to apply the advection operator to the whole model. It's called by distribute only. 
 
 
 ---
 
-<a href="../../facsimile/framework.py#L165"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L194"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `bvp`
 
@@ -49,7 +60,7 @@ bvp(modelprocesses)
 
 ---
 
-<a href="../../facsimile/framework.py#L286"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L317"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `makeSDgraph`
 
@@ -67,7 +78,7 @@ makeSDgraph(filename, spacefactor, dynfactor, parfactor)
 
 
 
-<a href="../../facsimile/framework.py#L200"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L229"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>function</kbd> `__init__`
 
@@ -75,7 +86,13 @@ makeSDgraph(filename, spacefactor, dynfactor, parfactor)
 __init__(dynfactor, spacefactor, parfactor, initvalue, maxt)
 ```
 
-:param modelprocesses: :param modelspace: :param modelvariables: :param initvalue: :param advrate: :param parameter_query: 
+This function  is the "inverse" of factorization. It takes as inputs 3 factors, space, dynamic  parameters and outputs the SIR model in Reaction  form suitable to be integrated  with the Gillespy toolbox 
+
+**Args:**
+ space: Space Factor (framework.SpaceFator) dynamics: Dynamics Factor 
+
+**Returns:**
+ model: Gillespy Reaction model 
 
 
 
@@ -103,7 +120,7 @@ __init__()
 
 ---
 
-<a href="../../facsimile/framework.py#L26"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L32"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>function</kbd> `add_process`
 
@@ -111,9 +128,15 @@ __init__()
 add_process(name, source, moc, fun, indices=[])
 ```
 
+This Method adds a model process to an existing Dynamics Factor If the process already exists, this method can be used to add addtional modes of computation 
 
-
-
+**Args:**
+ 
+ - <b>`name`</b>:  Name of the model process (string) 
+ - <b>`source`</b>:  Traceability string (string) 
+ - <b>`moc`</b>:  Mode of computation (string) 
+ - <b>`fun`</b>:  Function implementing the process for the model of computation specified 
+ - <b>`indices `</b>:  List of indices the process depends on. (default []) 
 
 ---
 
@@ -125,13 +148,16 @@ add_process(name, source, moc, fun, indices=[])
 add_variable(name, indices=[])
 ```
 
+This Method adds a model variable to an existing Dynamics Factor 
 
-
-
+**Args:**
+ 
+ - <b>`name`</b>:  Name of the model variable 
+ - <b>`indices `</b>:  List of indices the variable depends on. (default []) 
 
 ---
 
-<a href="../../facsimile/framework.py#L39"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L61"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>function</kbd> `get_processes`
 
@@ -139,13 +165,17 @@ add_variable(name, indices=[])
 get_processes(moc=[])
 ```
 
+Get the dynamic processes of the factor for a set of mocs. If the moc parameter is empty, return all the known mocs for each  process 
 
+**Args:**
+ moc (list): List of models of computation (default []) 
 
-
+**Returns:**
+ list: model processes 
 
 ---
 
-<a href="../../facsimile/framework.py#L37"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L54"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>function</kbd> `get_variables`
 
@@ -153,9 +183,10 @@ get_processes(moc=[])
 get_variables()
 ```
 
+Get the Dynamic variables for the factor 
 
-
-
+**Returns:**
+ list: list of model variables 
 
 
 ---
@@ -163,7 +194,7 @@ get_variables()
 ## <kbd>class</kbd> `ParameterFactor`
 Hold the data for a dynamic factor 
 
-<a href="../../facsimile/framework.py#L84"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L114"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>function</kbd> `__init__`
 
@@ -180,7 +211,7 @@ __init__()
 
 ---
 
-<a href="../../facsimile/framework.py#L93"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L123"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>function</kbd> `add_parameter`
 
@@ -194,7 +225,7 @@ add_parameter(name, fun)
 
 ---
 
-<a href="../../facsimile/framework.py#L96"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L126"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>function</kbd> `get_parameters`
 
@@ -212,7 +243,7 @@ get_parameters()
 ## <kbd>class</kbd> `SpaceFactor`
 Hold the data for a dynamic factor 
 
-<a href="../../facsimile/framework.py#L53"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L83"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>function</kbd> `__init__`
 
@@ -229,7 +260,7 @@ __init__()
 
 ---
 
-<a href="../../facsimile/framework.py#L66"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L96"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>function</kbd> `add_advection`
 
@@ -243,7 +274,7 @@ add_advection(name, index, fun)
 
 ---
 
-<a href="../../facsimile/framework.py#L63"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L93"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>function</kbd> `add_index`
 
@@ -257,7 +288,7 @@ add_index(name, values)
 
 ---
 
-<a href="../../facsimile/framework.py#L70"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L100"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>function</kbd> `get_space`
 
