@@ -6,22 +6,19 @@ import facsimile.SIRexample as S
 import facsimile.framework as F
 
 
-def simul_o():
+def simul_o(nreg=3,nproc=2):
     """
 
     :return:
     """
 
-    SIRdyn=S.get_dynamics_factor()
-    SIRspace=S.get_space_factor()
+    SIRdyn=S.get_dynamics_factor(nproc)
+    SIRspace=S.get_space_factor(nreg)
     SIRparams=S.get_parameters_factor()
 
     print(SIRdyn)
     print(SIRspace)
     print(SIRparams)
-
-
-
 
     model=F.distribute_to_ode(SIRspace,SIRdyn,SIRparams)
 
@@ -34,15 +31,15 @@ def simul_o():
     for r in regions:
         for mv in mvss:
             y0.append(S.initvalue(mv,r))
-            
-    maxt=100 # maximum time of simulation
-    out = SI.RK45(model,0,y0,maxt)
 
+    maxt=100 # maximum time of simulation
+    out = SI.RK45(model,0,y0,maxt,rtol=1e-5,max_step=0.1,atol=1e-5)
     tv=list()
     yv=list()
     t=0
-    while t< maxt:
+    while out.status=='running':
         out.step()
+
         t=out.t
         tv.append(out.t)
         yv.append(list(out.y))
@@ -58,8 +55,8 @@ def simul_o():
     P.grid()
     #P.title('_'.join([f['name'] for f in modelprocesses]))
     P.legend()
-    P.savefig(regions[j]+'SIR.pdf')
 
+    P.savefig(regions[j]+'SIR.pdf')
     # plot results
     P.figure()
     for j in [0,1]:
@@ -75,7 +72,7 @@ def simul_o():
 
     return [tv,yv],model
 
-def simul_g():
+def simul_g(nreg=3,nproc=2):
     """
 
     :return:
@@ -83,8 +80,8 @@ def simul_g():
 
 
 
-    SIRdyn=S.get_dynamics_factor()
-    SIRspace=S.get_space_factor()
+    SIRdyn=S.get_dynamics_factor(nproc)
+    SIRspace=S.get_space_factor(nreg)
     SIRparameters=S.get_parameters_factor()
     y0=S.initvalue
     maxt=100

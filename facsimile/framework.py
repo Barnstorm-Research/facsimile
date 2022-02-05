@@ -145,8 +145,8 @@ def applyadv(advoper, var, indexvalues):
     aff=list()
     for i in range(len(indexvalues)):
         for j in range(len(var)):
-            ff= lambda y: advoper(y[j+i*len(var)],y[j:j+len(var)*(len(indexvalues)-1):len(var)])
-            aff.append(ff)
+           aff.append(lambda y,i=i,j=j: \
+                      advoper(y[j+i*len(var)],y[j:len(var)*(len(indexvalues)):len(var)]))
     aadv=lambda y : [fff(y) for fff in aff]
     return aadv
 
@@ -216,7 +216,7 @@ class Distribute_to_gillespie(gillespy2.Model):
         # This is valid only for one index
         # simple advection
         index0=spacefactor.indices[0]['name']
-        advrate=spacefactor.advections[index0]['implementation'](1,[0])
+        advrate=-spacefactor.advections[index0]['implementation'](1,[0])
 
         #
         # Parameters from FERMI

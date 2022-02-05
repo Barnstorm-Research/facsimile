@@ -19,7 +19,7 @@ Dynamics Factor
 def get_dynamics_factor(nproc=3):
     sir_df=F.DynamicsFactor()
     for v in  ['S','I','R']:
-        sir_df.add_variable(v,'Region')
+        sir_df.add_variable(v,['Region'])
     
     for (po,pg) in zip([infection,recovery,reinfection][:nproc],[infectionG,recoveryG,reinfectionG][:nproc]):
         mp=dict()
@@ -37,9 +37,9 @@ Space Component
 
 '''
 
-def get_space_factor():
+def get_space_factor(nregions=3):
     SIRsp=F.SpaceFactor()    
-    SIRsp.add_index('Region',['Metroton','Suburbium','Ruralia'])
+    SIRsp.add_index('Region',['Metroton','Suburbium','Ruralia','Westcosta','Islandii'][:nregions])
     SIRsp.add_advection('Travel','Region',travel)
     return SIRsp 
                         
@@ -62,8 +62,11 @@ def initvalue(variable,zone):
     elif variable == 'I':
         if zone=='Ruralia':
             iv=100
+        elif zone == 'Westcosta':
+            iv=10
+        else:
+            iv=0
     return iv
-
 
 def get_parameters_factor():
     
@@ -209,8 +212,7 @@ def travel(x,y):
     """
     # Fraction of Population traveling out of zone a and
     # into zone b per unit time
-    ff = 1e-4  
+    ff = 1e-4
     # advection is balance of population out of
     # zone of interest
-    return sum([ff*(x-yy) for yy in y])
-
+    return sum([-ff*(x-yy) for yy in y])
