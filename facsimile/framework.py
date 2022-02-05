@@ -21,9 +21,26 @@ class DynamicsFactor:
                 return pprint.pformat({'Variables':self.variables,'Processes':self.processes})
     
     def add_variable(self,name,indices=[]):
+        '''
+        This Method adds a model variable to an existing Dynamics Factor
+        Args:
+         name: Name of the model variable
+         indices : List of indices the variable depends on. (default [])
+        '''
         self.variables.append({'name':name,'indices':indices})
         return
     def add_process(self, name,source,moc,fun,indices=[]):
+        '''
+        This Method adds a model process to an existing Dynamics Factor
+        If the process already exists, this method can be used to add addtional
+        modes of computation
+        Args:
+         name: Name of the model process (string)
+         source: Traceability string (string)
+         moc: Mode of computation (string)
+         fun: Function implementing the process for the model of computation specified
+         indices : List of indices the process depends on. (default [])
+        '''
         names=[p['name'] for p in self.processes]
         imp={'source':source,'moc':moc,'function':fun}
         if name in names:
@@ -35,8 +52,21 @@ class DynamicsFactor:
         return
 
     def get_variables(self):
+        '''
+        Get the Dynamic variables for the factor
+        Returns:
+        list: list of model variables
+        '''
         return self.variables
     def get_processes(self,moc=[]):
+        '''
+        Get the dynamic processes of the factor for a set of mocs.
+        If the moc parameter is empty, return all the known mocs for each  process
+        Args:
+        moc (list): List of models of computation (default [])
+        Returns:
+        list: model processes
+        '''
         if not moc:
             return self.processes
         else:
@@ -61,9 +91,25 @@ class SpaceFactor:
 
 
     def add_index(self,name,values):
+        '''
+        This Method adds a new index type, and the corresponding values 
+        to an existing Space Factor
+        Args:
+         name: Name of the Index type
+         values: List of values for the index type.
+        '''
         self.indices.append({'name':name,'values':values})
         return
+    
     def add_advection(self, name,index ,fun):
+        '''
+        This Method adds a new advection operator to an existing Space Factor
+        Args:
+         name: Name of the advection operator
+         index: Name of the index over which this advection operates
+         fun: function implementing the advection operator
+        '''
+
         self.advections[index]={'name':name,'implementation':fun}
         return
 
@@ -91,6 +137,13 @@ class ParameterFactor:
     
 
     def add_parameter(self,name,fun):
+        '''
+        This Method adds a new parameter to the Parameter Factor
+        Args:
+         name: Parameter name
+         fun: Function implementing a query to obtain the value of the parameter for a given condition
+        '''
+
         self.parameters.append({'name':name,'implementation':fun})
 
     def get_parameters(self):
@@ -104,11 +157,14 @@ class ParameterFactor:
 
 def distribute_to_ode(space,dynamics,parameters):
     """
-    This functionn is the "inverse" of factorization. It takes as inputs the 2 factors, space and dynamics, and
-    outputs the SIR model in ODE form.
-    :param space:
-    :param dynamics:
-    :return:
+    This function is the "inverse" of factorization. It takes as inputs 3 factors, space,
+    dynamics and parameters, and outputs the SIR model in ODE form suitable to be
+    integrated with scipy.Integrate methods
+Args:
+    space: Space Factor (framework.SpaceFator)
+    dynamics: Dynamics Factor
+Returns:
+    model: ODE function with the signature expected by scipy integrate
     """
 
     # TODO: This assumes one index only
@@ -137,10 +193,6 @@ def applyadv(advoper, var, indexvalues):
     """
     This is an utility function to apply the advection operator to the whole model.
     It's called by distribute only.
-    :param advoper:
-    :param var:
-    :param indexvalues:
-    :return:
     """
     aff=list()
     for i in range(len(indexvalues)):
@@ -199,13 +251,15 @@ class Distribute_to_gillespie(gillespy2.Model):
 
     def __init__(self, dynfactor,spacefactor,parfactor,initvalue,maxt):
         """
-
-        :param modelprocesses:
-        :param modelspace:
-        :param modelvariables:
-        :param initvalue:
-        :param advrate:
-        :param parameter_query:
+        This function 
+        is the "inverse" of factorization. It takes as inputs 3 factors, space, dynamic 
+        parameters and outputs the SIR model in Reaction  form suitable to be integrated 
+        with the Gillespy toolbox
+        Args:
+        space: Space Factor (framework.SpaceFator)
+        dynamics: Dynamics Factor
+        Returns:
+        model: Gillespy Reaction model
         """
         gillespy2.Model.__init__(self, name='Gillespie')
 
@@ -285,8 +339,12 @@ class Distribute_to_gillespie(gillespy2.Model):
 
 def makeSDgraph(filename,spacefactor,dynfactor,parfactor):
     """
-
-    :return:
+    Build a graph fo the model factors and save it in dot format.
+    Args:
+    filename: Name for the graph file. The extention .dot will be added
+    spacefactor: Space Factor (framework.SpaceFactor)
+    dynfactor: Dynamics Factor (framework.DynamicsFactor)
+    parfactor: Parameters Factor (framework.ParameterFactor)
     """
     mss=spacefactor.indices
     mssa=spacefactor.advections

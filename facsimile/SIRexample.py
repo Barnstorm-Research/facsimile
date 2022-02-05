@@ -13,10 +13,21 @@ SIR Model Factors Definition
 
 '''
 Dynamics Factor
-
 '''
 
 def get_dynamics_factor(nproc=3):
+    '''
+    Create Dynamics Factor for the SIR model
+    There are 3 processes defined in this example, Infection recovery and reinfection
+    the optional parameter nproc dis used to select how many of these 3 are used. 
+    The processes have one reference implementation (ODE) and one translated 
+    implementation (Gillespie)
+    There are threee dynamic variables, S, I and R which are indexed with the Region index
+    Args:
+    nproc: Number of processes (default 2)
+    Returns:
+    (frameowrk.DynamicsFactor) SIR Dynamics Factor
+    '''
     sir_df=F.DynamicsFactor()
     for v in  ['S','I','R']:
         sir_df.add_variable(v,['Region'])

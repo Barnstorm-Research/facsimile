@@ -2,8 +2,8 @@ import scipy.integrate as SI
 import numpy as N
 import pylab as P
 import gillespy2
-import facsimile.SIRexample as S
-import facsimile.framework as F
+#import facsimile.SIRexample as S
+#import facsimile.framework as F
 
 
 def simul_o(nreg=3,nproc=2):

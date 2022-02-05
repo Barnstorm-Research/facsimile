@@ -2,7 +2,7 @@
 
 <a href="../../facsimile/SIRexample.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
-# <kbd>module</kbd> `SIRexample.py`
+# <kbd>module</kbd> `SIRexample`
 
 
 
@@ -10,7 +10,7 @@
 
 ---
 
-<a href="../../facsimile/SIRexample.py#L19"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/SIRexample.py#L18"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `get_dynamics_factor`
 
@@ -18,14 +18,19 @@
 get_dynamics_factor(nproc=3)
 ```
 
+Create Dynamics Factor for the SIR model There are 3 processes defined in this example, Infection recovery and reinfection the optional parameter nproc dis used to select how many of these 3 are used.  The processes have one reference implementation (ODE) and one translated  implementation (Gillespie) There are threee dynamic variables, S, I and R which are indexed with the Region index 
 
+**Args:**
+ 
+ - <b>`nproc`</b>:  Number of processes (default 2) 
 
-
+**Returns:**
+ (frameowrk.DynamicsFactor) SIR Dynamics Factor 
 
 
 ---
 
-<a href="../../facsimile/SIRexample.py#L40"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/SIRexample.py#L51"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `get_space_factor`
 
@@ -40,7 +45,7 @@ get_space_factor(nregions=3)
 
 ---
 
-<a href="../../facsimile/SIRexample.py#L52"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/SIRexample.py#L63"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `initvalue`
 
@@ -48,12 +53,20 @@ get_space_factor(nregions=3)
 initvalue(variable, zone)
 ```
 
-:param variable: :param zone: :return: 
+Return the initial value for a variable in a given Region 
+
+
+
+**Args:**
+ variable: Dynamic Variable, one of S, I or R zone: Name of the region 
+
+**Returns:**
+ double iv: initial value for the variable in the region 
 
 
 ---
 
-<a href="../../facsimile/SIRexample.py#L71"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/SIRexample.py#L85"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `get_parameters_factor`
 
@@ -68,7 +81,7 @@ get_parameters_factor()
 
 ---
 
-<a href="../../facsimile/SIRexample.py#L85"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/SIRexample.py#L99"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `infection`
 
@@ -85,7 +98,7 @@ Reference implementation for infection as an ODE
 
 ---
 
-<a href="../../facsimile/SIRexample.py#L103"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/SIRexample.py#L117"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `recovery`
 
@@ -102,7 +115,7 @@ Reference implementation for recovery
 
 ---
 
-<a href="../../facsimile/SIRexample.py#L123"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/SIRexample.py#L137"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `reinfection`
 
@@ -119,7 +132,7 @@ Reference implementation for recovery
 
 ---
 
-<a href="../../facsimile/SIRexample.py#L144"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/SIRexample.py#L158"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `infectionG`
 
@@ -132,7 +145,7 @@ Reference: def infection(t,y,params=[1e-2,1e-3,1e-3]):  beta = params[0]  flow=y
 
 ---
 
-<a href="../../facsimile/SIRexample.py#L163"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/SIRexample.py#L177"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `recoveryG`
 
@@ -145,7 +158,7 @@ Reference: def recovery(t,y,params=[1e-2,1e-3,1e-3]): rho=params[1] flow = y[1]*
 
 ---
 
-<a href="../../facsimile/SIRexample.py#L182"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/SIRexample.py#L196"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `reinfectionG`
 
@@ -158,7 +171,7 @@ Reference: def reinfection(t,y,params=[1e-2,1e-3,1e-3]):  beta = params[2]  flow
 
 ---
 
-<a href="../../facsimile/SIRexample.py#L206"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/SIRexample.py#L220"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `travel`
 

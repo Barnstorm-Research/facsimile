@@ -2,7 +2,7 @@
 
 <a href="../../facsimile/demo.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
-# <kbd>module</kbd> `demo.py`
+# <kbd>module</kbd> `demo`
 
 
 
