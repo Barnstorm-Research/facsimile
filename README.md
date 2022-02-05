@@ -187,6 +187,10 @@ With the composed model
 
 ![ODE Sim](docs/figs/SIRODE3.png)
 
+With the composed model and additional regions
+
+![ODE Sim](docs/figs/SIRODE3_5.png)
+
 
 
 ### Gillespie algorithm stochastic simulation
