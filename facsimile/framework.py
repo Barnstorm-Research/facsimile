@@ -1,3 +1,8 @@
+'''
+This module contains the class and method definitions used to compose, modify and 
+render factored models into executable simulations
+'''
+
 import functools as F
 import scipy.integrate as SI
 import numpy as N
@@ -7,7 +12,7 @@ import facsimile.fermi as fermi
 import pprint
 
 class DynamicsFactor:
-    ''' 
+    '''
     Hold the data for a dynamic factor
     '''
     

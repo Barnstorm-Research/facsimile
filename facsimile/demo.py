@@ -1,3 +1,6 @@
+'''
+Demonstration script to assemble, render and run SIR models
+'''
 import scipy.integrate as SI
 import numpy as N
 import pylab as P
@@ -8,8 +11,15 @@ import gillespy2
 
 def simul_o(nreg=3,nproc=2):
     """
-
-    :return:
+    Distribute the SIR Factors into an ODE based simulation
+    runs the simulation and plots the results
+    Args:
+       nreg: Number of regions to be used (default 3)
+       nproc: Number of processes to be used  2 (inf, rec) or 3 (inf,rec,reinf)
+    Returns:
+       [tv,yv]: Time vectot and values vector
+       model: ODE based model function
+       
     """
 
     SIRdyn=S.get_dynamics_factor(nproc)
@@ -74,10 +84,16 @@ def simul_o(nreg=3,nproc=2):
 
 def simul_g(nreg=3,nproc=2):
     """
-
-    :return:
+    Distribute the SIR Factors into an Gillespie based simulation
+    runs the simulation and plots the results
+    Args:
+       nreg: Number of regions to be used (default 3)
+       nproc: Number of processes to be used  2 (inf, rec) or 3 (inf,rec,reinf)
+    Returns:
+       results: Time vector and values vector
+       model: Gillespie  based model object
+       
     """
-
 
 
     SIRdyn=S.get_dynamics_factor(nproc)
@@ -98,9 +114,9 @@ def simul_g(nreg=3,nproc=2):
 
 def runboth(figuresBlock=True):
     """
-
-    :param figuresBlock: If true, then the plots block the function
-    :return:
+    Run Both ODE and GIllespie simulations
+    Args:
+       figuresBlock: If true, then the plots block the function
     """
     P.close('all')
     simul_o()

@@ -1,3 +1,8 @@
+'''                                                                                              This module contains definitiopns for the Space, parameter and Dynamics factor for
+an SIR epidemics model
+These factors can be composed, modified, and rendered into executable models using the tools of the FACSIMILE framework                                                                     
+'''
+
 from typing import List
 from facsimile import framework as F
 import facsimile.fermi as fermi
@@ -24,9 +29,9 @@ def get_dynamics_factor(nproc=3):
     implementation (Gillespie)
     There are threee dynamic variables, S, I and R which are indexed with the Region index
     Args:
-    nproc: Number of processes (default 2)
+        nproc: Number of processes (default 2)
     Returns:
-    (frameowrk.DynamicsFactor) SIR Dynamics Factor
+        sir_df: (frameowrk.DynamicsFactor) SIR Dynamics Factor
     '''
     sir_df=F.DynamicsFactor()
     for v in  ['S','I','R']:
@@ -49,6 +54,15 @@ Space Component
 '''
 
 def get_space_factor(nregions=3):
+    '''
+    Create Space Factor for the SIR model. There is one index type (Region) with up 
+    to 5 possible values
+    Args:
+        nregions: Number of regions used for the model (default 3)
+    Returns:
+        sir_sf: (frameowrk.SpaceFactor) SIR Space Factor
+    '''
+
     SIRsp=F.SpaceFactor()    
     SIRsp.add_index('Region',['Metroton','Suburbium','Ruralia','Westcosta','Islandii'][:nregions])
     SIRsp.add_advection('Travel','Region',travel)
@@ -62,10 +76,12 @@ Parameters Factor
 
 def initvalue(variable,zone):
     """
-
-    :param variable:
-    :param zone:
-    :return:
+    Return the initial value for a variable in a given Region
+    Args:
+        variable: Dynamic Variable, one of S, I or R
+        zone: Name of the region
+    Returns:
+        iv: initial value for the variable in the region
     """
     iv=0
     if variable == 'S':
@@ -95,13 +111,13 @@ Function definitions
 
 def infection(t,y,params=[1e-2,1e-3,1e-3]):
     r"""
-    Reference implementation for infection
-    as an ODE
-
-    :param t: time
-    :param y: list of current values of S, I, R
-    :param params: list of model paramters 
-    :return: list with contributions of infection process to S, I, R derivatives
+    Reference implementation for infection as an ODE
+    Args:
+       t: time
+       y: list of current values of S, I, R
+       params: list of model paramters 
+    Returns:
+        list with contributions of infection process to S, I, R derivatives
 
     :math:'\frac{dS}{dt}=-\beta I S'
     :math:'\frac{dI}{dt}=\beta I S'
@@ -114,18 +130,16 @@ def infection(t,y,params=[1e-2,1e-3,1e-3]):
 def recovery(t,y,params=[1e-2,1e-3,1e-3]):
     r"""
     Reference implementation for recovery
-
-    :param t: time
-    :param y: list of current values of S, I, R
-    :param params: list of model paramters 
-    :return: list with contributions of recovery process to S, I, R derivatives
+    Args:
+        t: time
+        y: list of current values of S, I,R
+        params: list of model paramters 
+    Returns: 
+        list with contributions of recovery process to S, I, R derivatives
 
     :math:'\frac{dS}{dt}=0'
     :math:'\frac{dI}{dt}=-\rho I'
     :math:'\frac{dR}{dt}=\rho I'
-
-
-
     """
     rho=params[1]
     flow = y[1]*rho
@@ -134,11 +148,12 @@ def recovery(t,y,params=[1e-2,1e-3,1e-3]):
 def reinfection(t,y,params=[1e-2,1e-3,1e-3]):
     r"""
     Reference implementation for recovery
-
-    :param t: time
-    :param y: list of current values of S, I, R
-    :param params: list of model paramters 
-    :return: list with contributions of recovery process to S, I, R derivatives
+    Args:
+        t: time
+        y: list of current values of S, I, R
+        params: list of model paramters 
+    Returns:
+    list with contributions of recovery process to S, I, R derivatives
 
     :math:'\frac{dS}{dt}=0'
     :math:'\frac{dI}{dt}=\beta I S'
@@ -159,9 +174,6 @@ def infectionG(y,params):
        beta = params[0]
        flow=y[0]*y[1]*beta
        return [-flow,flow,0.0]
-    :param y:
-    :param params:
-    :return:
     """
     beta=params[0]
     react=dict()
@@ -178,9 +190,6 @@ def recoveryG(y,params):
     rho=params[1]
     flow = y[1]*rho
     return [0.0, -flow,flow]
-    :param y:
-    :param params:
-    :return:
     """
     rho=params[1]
     react=dict()
@@ -197,9 +206,6 @@ def reinfectionG(y,params):
         beta = params[2]
         flow=y[1]*y[2]*beta
         return [0.0,flow,-flow]
-    :param y:
-    :param params:
-    :return:
     """
     beta = params[2]
     react=dict()
@@ -216,10 +222,13 @@ def reinfectionG(y,params):
 
 def travel(x,y):
     """
-    Advection operator.
-    :param x: population in zone of interest
-    :param y: vector of population in all zones
-    :return:
+    Implementation of the travel Advection operator.
+
+    Args:
+       x: population in zone of interest
+       y: vector of population in all zones
+    Returns:
+       v: vector of rate of travel into zone of interest from each of the zones 
     """
     # Fraction of Population traveling out of zone a and
     # into zone b per unit time
