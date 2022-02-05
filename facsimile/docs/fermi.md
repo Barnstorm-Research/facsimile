@@ -3,9 +3,7 @@
 <a href="../../facsimile/fermi.py#L0"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 # <kbd>module</kbd> `fermi`
-
-
-
+This is a stand in for the FERMI tool. Computes  zone dependent constants First value is the transmission rate in the zone second number is the recovery rate out of the zone 
 
 
 ---
@@ -18,12 +16,21 @@
 fermi(query, indexvalue)
 ```
 
-:param query: :param indexvalue: :return: 
+Stand in for a call to the Fermi Framework 
+
+**Args:**
+ 
+ - <b>`query`</b>:  string containing the query to pass to Fermi 
+ - <b>`indexvalue`</b>:  parameters for the query 
+
+**Returns:**
+ 
+ - <b>`answer`</b>:  Answer to the query returned by Fermi. Empty if the query failed 
 
 
 ---
 
-<a href="../../facsimile/fermi.py#L20"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/fermi.py#L22"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `infrecrate`
 
@@ -31,7 +38,15 @@ fermi(query, indexvalue)
 infrecrate(zone)
 ```
 
-:param zone: Metroton, Suburbium or will return a default :return: 
+Stand in for Fermi query execution 
+
+**Args:**
+ 
+ - <b>`zone`</b>:  Region element 
+
+**Returns:**
+ 
+ - <b>`parameters`</b>:  Value of the three parameters 
 
 
 
