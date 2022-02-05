@@ -1,6 +1,25 @@
 # Facsimile 0.1
 
+# Introduction
+
+Computational models are key artifacts through which scientific knowledge is encoded, propagated, and applied to real-world problems. 
+However, creating, maintaining, and applying models, simulators, and associated data is currently very labor-intensive. 
+Model and simulator assumptions, algorithms, and implementations are often poorly understood by people other than their authors. 
+As a result, it is hard for third parties to update, modify, or extend models, or even to independently replicate experimental results 
+or evaluate an existing model’s fitness-for-purpose. A new toolchain for building models and simulators is needed that promotes 
+model and simulator transparency, understanding, verification, validation, adaptation, and reuse, and linking to data, 
+so that the expertise needed to maintain and exploit them can be easily transferred from their authors to other scientists 
+and future generations. Tools are also needed to “lift” the enormous collection of existing models into this toolchain and 
+retrofit them to be more transparent. FACSIMILE (FACtored SImulation Model Inference and Linking Engine), greatly speeds
+understanding, creation, modification, and use of scientific models. Central to FACSIMILE is a unique “factored” 
+representation for describing, composing, and refining scientific models and constructing simulators 
+
+
 # Sample models and Workflows
+
+The following example demonstrates some of the FACSIMILE capabilities, such as model factoring, model rendering, model composition and multi model-of-computation 
+workflows.
+
 ## SIR Model
 
 
