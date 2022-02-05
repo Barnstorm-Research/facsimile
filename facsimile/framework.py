@@ -289,6 +289,7 @@ def makeSDgraph(filename,spacefactor,dynfactor,parfactor):
     :return:
     """
     mss=spacefactor.indices
+    mssa=spacefactor.advections
     with open(filename+'.dot','w') as f:
         f.write('digraph test { \n')
         f.write('rankdir=TP \n')
@@ -317,15 +318,17 @@ def makeSDgraph(filename,spacefactor,dynfactor,parfactor):
             else:
                 f.write(lo+' -> '+l['name']+'a [style=invis]\n')
                 lo=l['name']+'a'
-            if 'advection' in l:
-                f.write(l['advection']['name']+' [shape=oval,fontsize=10] \n')
-                f.write(lo+ '  -> ' + l['advection']['name']+ \
+            if l['name'] in mssa:
+            #if 'advection' in l:
+                advname=mssa[l['name']]['name']
+                f.write(advname+' [shape=oval,fontsize=10] \n')
+                f.write(lo+ '  -> ' + advname+ \
                         '[ltail = cluster'+l['name']+\
                         ',color=blue,penwidth=3]\n')
-                f.write(l['advection']['name'] + \
+                f.write(advname + \
                         ' -> '+lo+' [lhead = cluster'+l['name']+ \
                         ',color=blue,penwidth=3] \n')
-                lo=l['advection']['name']
+                lo=advname
                 
         f.write('}')
         f.write('subgraph clusterparams { \n')
