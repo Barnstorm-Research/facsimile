@@ -29,17 +29,17 @@ def get_dynamics_factor(nproc=3):
         sir_df: (frameowrk.DynamicsFactor) SIR Dynamics Factor
     '''
     sir_df=F.Dynamics_Factor()
-    for v in  ['S','I','R']:
-        sir_df.add_variable(v,['Region'])
+    for variab in  ['S','I','R']:
+        sir_df.add_variable(variab,['Region'])
 
-    for (po,pg) in zip([infection,recovery,reinfection][:nproc],\
+    for (proc_ode,proc_gilles) in zip([infection,recovery,reinfection][:nproc],\
                        [infection_G,recovery_G,reinfection_G][:nproc]):
-        mp={}
-        mp['name']=po.__name__
-        mp['implementations']=[]
+        model_proc={}
+        model_proc['name']=proc_ode.__name__
+        model_proc['implementations']=[]
         source='reference'
-        for (moc,fun)  in zip(['ODE','Gillespie'],[po,pg]):
-            sir_df.add_process(po.__name__,source,moc,fun,['Region'])
+        for (moc,fun)  in zip(['ODE','Gillespie'],[proc_ode,proc_gilles]):
+            sir_df.add_process(proc_ode.__name__,source,moc,fun,['Region'])
             source='translated'
     return sir_df
 
@@ -58,10 +58,10 @@ def get_space_factor(nregions=3):
         sir_sf: (frameowrk.SpaceFactor) SIR Space Factor
     '''
 
-    SIRsp=F.Space_Factor()
-    SIRsp.add_index('Region',['Metroton','Suburbium','Ruralia','Westcosta','Islandii'][:nregions])
-    SIRsp.add_advection('Travel','Region',travel)
-    return SIRsp
+    SIR_space=F.Space_Factor()
+    SIR_space.add_index('Region',['Metroton','Suburbium','Ruralia','Westcosta','Islandii'][:nregions])
+    SIR_space.add_advection('Travel','Region',travel)
+    return SIR_space
 
 ###
 # Parameters Factor
@@ -77,25 +77,25 @@ def init_value(variable,zone):
     Returns:
         iv: initial value for the variable in the region
     """
-    iv=0
+    init_value=0
     if variable == 'S':
-        iv=1000
+        init_value=1000
     elif variable == 'I':
         if zone=='Ruralia':
-            iv=100
+            init_value=100
         elif zone == 'Westcosta':
-            iv=10
+            init_value=10
         else:
-            iv=0
-    return iv
+            init_value=0
+    return init_value
 
 def get_parameters_factor():
 
-    SIRparams=F.Parameter_Factor()
-    SIRparams.add_parameter('Infection_rate',lambda zone: fermi.fermi('infrecrates',zone)[0])
-    SIRparams.add_parameter('Recovery_rate',lambda zone: fermi.fermi('infrecrates',zone)[1])
-    SIRparams.add_parameter('Reinfection_rate',lambda zone: fermi.fermi('infrecrates',zone)[2])
-    return SIRparams
+    SIR_params=F.Parameter_Factor()
+    SIR_params.add_parameter('Infection_rate',lambda zone: fermi.fermi('infrecrates',zone)[0])
+    SIR_params.add_parameter('Recovery_rate',lambda zone: fermi.fermi('infrecrates',zone)[1])
+    SIR_params.add_parameter('Reinfection_rate',lambda zone: fermi.fermi('infrecrates',zone)[2])
+    return SIR_params
 
 ###
 # Function definitions
@@ -224,7 +224,7 @@ def travel(x,y):
     """
     # Fraction of Population traveling out of zone a and
     # into zone b per unit time
-    ff = 1e-4
+    travel_rate = 1e-4
     # advection is balance of population out of
     # zone of interest
-    return sum([-ff*(x-yy) for yy in y])
+    return sum([-travel_rate*(x-yy) for yy in y])
