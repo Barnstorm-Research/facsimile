@@ -2,10 +2,9 @@
 This module contains the class and method definitions used to compose, modify and
 render factored models into executable simulations
 '''
-from posixpath import supports_unicode_filenames
+
 import pprint
 import functools as F
-import scipy.integrate as SI
 import pylab as P
 import gillespy2
 
@@ -257,8 +256,8 @@ class Parameter_Factor:
 
         f.write('subgraph clusterparams { \n')
         f.write('label = Parameters_Factor  \n')
-        f.write('paramsa '+' [label="",style=invis,width=0] \n')
-        f.write(lo+' -> '+'paramsa [style=invis]\n')
+        #f.write('paramsa '+' [label="",style=invis,width=0] \n')
+        #f.write(lo+' -> '+'paramsa [style=invis]\n')
         for l in self.parameters:
             f.write(l['name']+' [shape=box, fontsize=10, label='+l['name']+' ] \n')
         f.write('}') # Close Parameters Factor
@@ -436,7 +435,6 @@ def build_factors_graph(filename,spacefactor,dynfactor,parfactor):
         f.write('fontsize=10 \n')
 
         spacefactor.to_dot(f)
-        parfactor.to_dot(f)
         dynfactor.to_dot(f)
-
+        parfactor.to_dot(f)
         f.write('}') # Close Graph
