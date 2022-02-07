@@ -1,21 +1,20 @@
 '''
-This module contains the class and method definitions used to compose, modify and 
+This module contains the class and method definitions used to compose, modify and
 render factored models into executable simulations
 '''
-
+import pprint
 import functools as F
 import scipy.integrate as SI
-import numpy as N
 import pylab as P
 import gillespy2
-import facsimile.fermi as fermi
-import pprint
+
+
 
 class DynamicsFactor:
     '''
     Hold the data for a dynamic factor
     '''
-    
+
     def __init__(self):
         self.processes = []
         self.variables = []
@@ -23,8 +22,8 @@ class DynamicsFactor:
     def __repr__(self):
         return repr({'Variables':self.variables,'Processes':self.processes})
     def __str__(self):
-                return pprint.pformat({'Variables':self.variables,'Processes':self.processes})
-    
+        return pprint.pformat({'Variables':self.variables,'Processes':self.processes})
+
     def add_variable(self,name,indices=[]):
         '''
         This Method adds a model variable to an existing Dynamics Factor
@@ -33,7 +32,7 @@ class DynamicsFactor:
          indices : List of indices the variable depends on. (default [])
         '''
         self.variables.append({'name':name,'indices':indices})
-        return
+
     def add_process(self, name,source,moc,fun,indices=[]):
         '''
         This Method adds a model process to an existing Dynamics Factor
@@ -54,8 +53,6 @@ class DynamicsFactor:
         else:
             self.processes.append({'name':name,'implementations':[imp],'indices':indices})
 
-        return
-
     def get_variables(self):
         '''
         Get the Dynamic variables for the factor
@@ -74,17 +71,16 @@ class DynamicsFactor:
         '''
         if not moc:
             return self.processes
-        else:
-            a=sum([f['implementations'] for f in self.processes],[])
-            return  [{'implementation':h['function'],\
-                              'name':h['function'].__name__} for h in a if h['moc']==moc]
+        a=sum([f['implementations'] for f in self.processes],[])
+        return  [{'implementation':h['function'],\
+                  'name':h['function'].__name__} for h in a if h['moc']==moc]
 
 
 class SpaceFactor:
-    ''' 
+    '''
     Hold the data for a dynamic factor
     '''
-    
+
     def __init__(self):
         self.indices = []
         self.advections = {}
@@ -92,20 +88,20 @@ class SpaceFactor:
     def __repr__(self):
         return repr({'Indices':self.indices,'Advections':self.advections})
     def __str__(self):
-                return pprint.pformat({'Indices':self.indices,'Advections':self.advections})
+        return pprint.pformat({'Indices':self.indices,'Advections':self.advections})
 
 
     def add_index(self,name,values):
         '''
-        This Method adds a new index type, and the corresponding values 
+        This Method adds a new index type, and the corresponding values
         to an existing Space Factor
         Args:
          name: Name of the Index type
          values: List of values for the index type.
         '''
         self.indices.append({'name':name,'values':values})
-        return
-    
+
+
     def add_advection(self, name,index ,fun):
         '''
         This Method adds a new advection operator to an existing Space Factor
@@ -116,7 +112,7 @@ class SpaceFactor:
         '''
 
         self.advections[index]={'name':name,'implementation':fun}
-        return
+
 
     def get_space(self):
         space=[]
@@ -128,25 +124,26 @@ class SpaceFactor:
 
 
 class ParameterFactor:
-    ''' 
+    '''
     Hold the data for a dynamic factor
     '''
-    
+
     def __init__(self):
         self.parameters = []
 
     def __repr__(self):
         return repr({'Parameters':self.parameters})
     def __str__(self):
-                return pprint.pformat({'Parameters':self.parameters})
-    
+        return pprint.pformat({'Parameters':self.parameters})
+
 
     def add_parameter(self,name,fun):
         '''
         This Method adds a new parameter to the Parameter Factor
         Args:
          name: Parameter name
-         fun: Function implementing a query to obtain the value of the parameter for a given condition
+         fun: Function implementing a query to obtain the value
+         of the parameter for a given condition
         '''
 
         self.parameters.append({'name':name,'implementation':fun})
@@ -178,20 +175,21 @@ Returns:
     var = [vv['name'] for vv in dynamics.variables]
 
     dynv= [p['implementation'] for p in dynamics.get_processes('ODE')]
-    
+
     #paramf=lambda indexv : fermi.fermi(fquery,indexv)
 
     params=parameters.get_parameters()
     def paramf(indexv):
         return [p['implementation'](indexv)  for p in params ]
 
-
-    mapfun = lambda l : lambda t,y :  dyn(t,y,l)
     redfun=lambda f1,f2: lambda t,x : f1(t,x[:-len(var)])+f2(t,x[-len(var):])
 
-    dyn = lambda t,y,indexvalue,dynv=dynv : [sum(a) for a in zip(*map(lambda f:f(t,y,paramf(indexvalue)),dynv))]
-    vdyn = list(map(lambda l,indexvalues=indexvalues : lambda t,y :  dyn(t,y,l),indexvalues))
-    vout=lambda t,y,redfun=redfun,vdyn=vdyn :  [sum(a) for a in zip(F.reduce(redfun,vdyn)(t,y) ,  applyadv(advoper,var,indexvalues)(y))]
+    dyn = lambda t,y,indexvalue,dynv=dynv : [sum(a) for a in \
+                                             zip(*map(lambda f:f(t,y,paramf(indexvalue)),dynv))]
+    vdyn = list(map(lambda l,indexvalues=indexvalues : \
+                    lambda t,y :  dyn(t,y,l),indexvalues))
+    vout=lambda t,y,redfun=redfun,vdyn=vdyn :  \
+        [sum(a) for a in zip(F.reduce(redfun,vdyn)(t,y) ,  applyadv(advoper,var,indexvalues)(y))]
     return vout
 
 def applyadv(advoper, var, indexvalues):
@@ -199,66 +197,26 @@ def applyadv(advoper, var, indexvalues):
     This is an utility function to apply the advection operator to the whole model.
     It's called by distribute only.
     """
-    aff=list()
+    aff=[]
     for i in range(len(indexvalues)):
         for j in range(len(var)):
-           aff.append(lambda y,i=i,j=j: \
+            aff.append(lambda y,i=i,j=j: \
                       advoper(y[j+i*len(var)],y[j:len(var)*(len(indexvalues)):len(var)]))
     aadv=lambda y : [fff(y) for fff in aff]
     return aadv
 
 
-
-
-
-
-                
 #######################################################
 # Model rendering and simulation  FUNCTIONS
 #######################################################
-
-
-
-def bvp(modelprocesses):
-    """
-
-    :param modelprocesses:
-    :return:
-    """
-    # model assembly
-    space =[ provinces() , travel]
-    dynamics = [modelvariables(), modelprocesses(),'infrecrates']
-    model=distribute_to_ode(space,dynamics)
-    t=P.linspace(0,100,10)
-    def bc(ya,yb):
-        an = [(ya[0]-1000),yb[1]-300,ya[2], (ya[3]-1000), (yb[4]-450),ya[5]]
-        return P.array(an)
-        
-
-    y_i = list(range(6))
-    
-    y_i[0]=[1000 for a in t]
-    y_i[1]=[100 for a in t]
-    y_i[2]=[100 for a in t]
-    y_i[3]=[1000 for a in t]
-    y_i[4]=[100 for a in t]
-    y_i[5]=[100 for a in t]
-    print(y_i)
-    y_i = P.array(y_i)
-    
-    res_a = SI.solve_bvp(model, bc, t, y_i,tol=.01)
-    return res_a
-
-
-
 
 class Distribute_to_gillespie(gillespy2.Model):
 
     def __init__(self, dynfactor,spacefactor,parfactor,initvalue,maxt):
         """
-        This function 
-        is the "inverse" of factorization. It takes as inputs 3 factors, space, dynamic 
-        parameters and outputs the SIR model in Reaction  form suitable to be integrated 
+        This function
+        is the "inverse" of factorization. It takes as inputs 3 factors, space, dynamic
+        parameters and outputs the SIR model in Reaction  form suitable to be integrated
         with the Gillespy toolbox
         Args:
         space: Space Factor (framework.SpaceFator)
@@ -280,11 +238,11 @@ class Distribute_to_gillespie(gillespy2.Model):
         #
         # Parameters from FERMI
         #
-        paramd=dict()
+        paramd={}
         params=parfactor.get_parameters()
 
         for r in modelspace()[0]['values']:
-            parameters = list()
+            parameters = []
             #prates= fermi.fermi(parameter_query,r)
             prates=[p['implementation'](r)  for p in params ]
             for i in range(len(prates)):
@@ -292,17 +250,17 @@ class Distribute_to_gillespie(gillespy2.Model):
                     name='k_c'+str(i)+r, expression=prates[i]))
             self.add_parameter(parameters)
             paramd[r]=parameters
-            
+
         k_travel=gillespy2.Parameter(name='k_travel', expression=advrate)
         self.add_parameter(k_travel)
-        
+
         #
         # Model Variables
         #
-    
-        speciesd=dict()
+
+        speciesd={}
         for r in modelspace()[0]['values']:
-            species=list()
+            species=[]
             for mv in [x['name'] for x in modelvariables()]:
                 species.append(gillespy2.Species(name=mv+r, initial_value=initvalue(mv,r)))
             self.add_species(species)
@@ -310,8 +268,8 @@ class Distribute_to_gillespie(gillespy2.Model):
         #
         # Processes and Advection
         #
-        
-        reactions=list()
+
+        reactions=[]
         i=0
         modelprocesses=[f['implementation'] for f in dynfactor.get_processes('Gillespie')]
         for r in modelspace()[0]['values']:
@@ -330,14 +288,13 @@ class Distribute_to_gillespie(gillespy2.Model):
             parameters=paramd[r]
             for rd in [ x for x in modelspace()[0]['values'] if x != r]:
                 species1=speciesd[rd]
-                parametersd=paramd[rd]
                 for k in range(len(modelvariables())):
-                     reactions.append(gillespy2.Reaction(
+                    reactions.append(gillespy2.Reaction(
                         name="r_travel"+r+rd+modelvariables()[k]['name'], rate=k_travel,\
                         reactants={species[k]:1}, products={species1[k]:1}))
 
         self.add_reaction(reactions)
-        
+
         # Set the timespan for the simulation.
         self.timespan(P.linspace(0, maxt, maxt+1))
 
@@ -392,7 +349,7 @@ def makeSDgraph(filename,spacefactor,dynfactor,parfactor):
                         ' -> '+lo+' [lhead = cluster'+l['name']+ \
                         ',color=blue,penwidth=3] \n')
                 lo=advname
-                
+
         f.write('}')
         f.write('subgraph clusterparams { \n')
         f.write('label = Parameters_Factor  \n')
@@ -401,7 +358,7 @@ def makeSDgraph(filename,spacefactor,dynfactor,parfactor):
         for l in parfactor.parameters:
             f.write(l['name']+' [shape=box, fontsize=10, label='+l['name']+' ] \n')
         f.write('}')
-        
+
         f.write('subgraph clusterDynamics { \n')
         f.write('label = DYNAMICS_Factor  \n')
         f.write('subgraph clusterEmpty  { \n')
@@ -445,5 +402,3 @@ def makeSDgraph(filename,spacefactor,dynfactor,parfactor):
         f.write('}\n')
 
         f.write('}')
-
-
