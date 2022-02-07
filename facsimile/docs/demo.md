@@ -8,7 +8,7 @@ Demonstration script to assemble, render and run SIR models
 
 ---
 
-<a href="../../facsimile/demo.py#L12"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/demo.py#L10"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `simul_o`
 
@@ -60,10 +60,10 @@ Distribute the SIR Factors into an Gillespie based simulation runs the simulatio
 
 <a href="../../facsimile/demo.py#L115"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
-## <kbd>function</kbd> `runboth`
+## <kbd>function</kbd> `run_both`
 
 ```python
-runboth(figuresBlock=True)
+run_both(figuresBlock=True)
 ```
 
 Run Both ODE and GIllespie simulations 

@@ -28,12 +28,12 @@ def get_dynamics_factor(nproc=3):
     Returns:
         sir_df: (frameowrk.DynamicsFactor) SIR Dynamics Factor
     '''
-    sir_df=F.DynamicsFactor()
+    sir_df=F.Dynamics_Factor()
     for v in  ['S','I','R']:
         sir_df.add_variable(v,['Region'])
 
     for (po,pg) in zip([infection,recovery,reinfection][:nproc],\
-                       [infectionG,recoveryG,reinfectionG][:nproc]):
+                       [infection_G,recovery_G,reinfection_G][:nproc]):
         mp={}
         mp['name']=po.__name__
         mp['implementations']=[]
@@ -58,7 +58,7 @@ def get_space_factor(nregions=3):
         sir_sf: (frameowrk.SpaceFactor) SIR Space Factor
     '''
 
-    SIRsp=F.SpaceFactor()
+    SIRsp=F.Space_Factor()
     SIRsp.add_index('Region',['Metroton','Suburbium','Ruralia','Westcosta','Islandii'][:nregions])
     SIRsp.add_advection('Travel','Region',travel)
     return SIRsp
@@ -68,7 +68,7 @@ def get_space_factor(nregions=3):
 ###
 
 
-def initvalue(variable,zone):
+def init_value(variable,zone):
     """
     Return the initial value for a variable in a given Region
     Args:
@@ -91,7 +91,7 @@ def initvalue(variable,zone):
 
 def get_parameters_factor():
 
-    SIRparams=F.ParameterFactor()
+    SIRparams=F.Parameter_Factor()
     SIRparams.add_parameter('Infection_rate',lambda zone: fermi.fermi('infrecrates',zone)[0])
     SIRparams.add_parameter('Recovery_rate',lambda zone: fermi.fermi('infrecrates',zone)[1])
     SIRparams.add_parameter('Reinfection_rate',lambda zone: fermi.fermi('infrecrates',zone)[2])
@@ -159,7 +159,7 @@ def reinfection(t,y,params=[1e-2,1e-3,1e-3]):
 
 # Translation of reference implementation
 
-def infectionG(y,params):
+def infection_G(y,params):
     """
     Reference:
     def infection(t,y,params=[1e-2,1e-3,1e-3]):
@@ -175,7 +175,7 @@ def infectionG(y,params):
     react['products']={y[1]:2}
     return react
 
-def recoveryG(y,params):
+def recovery_G(y,params):
     """
     Reference:
     def recovery(t,y,params=[1e-2,1e-3,1e-3]):
@@ -191,7 +191,7 @@ def recoveryG(y,params):
     react['products']={y[2]:1}
     return react
 
-def reinfectionG(y,params):
+def reinfection_G(y,params):
     """
     Reference:
     def reinfection(t,y,params=[1e-2,1e-3,1e-3]):

@@ -38,7 +38,7 @@ def simul_o(nreg=3,nproc=2):
     regions=SIRspace.get_space()[0]['values']
     for r in regions:
         for mv in mvss:
-            y0.append(S.initvalue(mv,r))
+            y0.append(S.init_value(mv,r))
 
     maxt=100 # maximum time of simulation
     out = SI.RK45(model,0,y0,maxt,rtol=1e-5,max_step=0.1,atol=1e-5)
@@ -99,7 +99,7 @@ def simul_g(nreg=3,nproc=2):
     SIRdyn=S.get_dynamics_factor(nproc)
     SIRspace=S.get_space_factor(nreg)
     SIRparameters=S.get_parameters_factor()
-    y0=S.initvalue
+    y0=S.init_value
     maxt=100
     model = F.Distribute_to_gillespie(SIRdyn,SIRspace,SIRparameters,y0,maxt)
 
@@ -112,7 +112,7 @@ def simul_g(nreg=3,nproc=2):
 
 
 
-def runboth(figuresBlock=True):
+def run_both(figuresBlock=True):
     """
     Run Both ODE and GIllespie simulations
     Args:
@@ -127,5 +127,5 @@ def runboth(figuresBlock=True):
 
 if __name__ == "__main__":
     print("facsimile demo. Running both simulations:")
-    runboth(figuresBlock=True)
+    run_both(figuresBlock=True)
     print("Good-bye")
