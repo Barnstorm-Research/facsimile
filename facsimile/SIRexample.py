@@ -1,31 +1,26 @@
-'''                                                                                              This module contains definitiopns for the Space, parameter and Dynamics factor for
-an SIR epidemics model
-These factors can be composed, modified, and rendered into executable models using the tools of the FACSIMILE framework                                                                     
+'''This Module contains definitiopns for the Space, parameter and Dynamics factor for
+an SIR epidemics model. These factors can be composed, modified, and rendered into
+executable modelsusing the tools of the FACSIMILE framework
 '''
 
-from typing import List
 from facsimile import framework as F
-import facsimile.fermi as fermi
-import scipy.integrate as SI
-import numpy as N
-import pylab as P
-import gillespy2
+from  facsimile import  fermi
 
-'''
-SIR Model Factors Definition
-'''
+###
+# SIR Model Factors Definition
+###
 
 
-'''
-Dynamics Factor
-'''
+###
+# Dynamics Factor
+###
 
 def get_dynamics_factor(nproc=3):
     '''
     Create Dynamics Factor for the SIR model
     There are 3 processes defined in this example, Infection recovery and reinfection
-    the optional parameter nproc dis used to select how many of these 3 are used. 
-    The processes have one reference implementation (ODE) and one translated 
+    the optional parameter nproc dis used to select how many of these 3 are used.
+    The processes have one reference implementation (ODE) and one translated
     implementation (Gillespie)
     There are threee dynamic variables, S, I and R which are indexed with the Region index
     Args:
@@ -36,11 +31,12 @@ def get_dynamics_factor(nproc=3):
     sir_df=F.DynamicsFactor()
     for v in  ['S','I','R']:
         sir_df.add_variable(v,['Region'])
-    
-    for (po,pg) in zip([infection,recovery,reinfection][:nproc],[infectionG,recoveryG,reinfectionG][:nproc]):
-        mp=dict()
+
+    for (po,pg) in zip([infection,recovery,reinfection][:nproc],\
+                       [infectionG,recoveryG,reinfectionG][:nproc]):
+        mp={}
         mp['name']=po.__name__
-        mp['implementations']=list()
+        mp['implementations']=[]
         source='reference'
         for (moc,fun)  in zip(['ODE','Gillespie'],[po,pg]):
             sir_df.add_process(po.__name__,source,moc,fun,['Region'])
@@ -48,14 +44,13 @@ def get_dynamics_factor(nproc=3):
     return sir_df
 
 
-'''
-Space Component
-
-'''
+###
+# Space Component
+###
 
 def get_space_factor(nregions=3):
     '''
-    Create Space Factor for the SIR model. There is one index type (Region) with up 
+    Create Space Factor for the SIR model. There is one index type (Region) with up
     to 5 possible values
     Args:
         nregions: Number of regions used for the model (default 3)
@@ -63,16 +58,15 @@ def get_space_factor(nregions=3):
         sir_sf: (frameowrk.SpaceFactor) SIR Space Factor
     '''
 
-    SIRsp=F.SpaceFactor()    
+    SIRsp=F.SpaceFactor()
     SIRsp.add_index('Region',['Metroton','Suburbium','Ruralia','Westcosta','Islandii'][:nregions])
     SIRsp.add_advection('Travel','Region',travel)
-    return SIRsp 
-                        
+    return SIRsp
 
-'''
-Parameters Factor
+###
+# Parameters Factor
+###
 
-'''
 
 def initvalue(variable,zone):
     """
@@ -96,18 +90,16 @@ def initvalue(variable,zone):
     return iv
 
 def get_parameters_factor():
-    
+
     SIRparams=F.ParameterFactor()
     SIRparams.add_parameter('Infection_rate',lambda zone: fermi.fermi('infrecrates',zone)[0])
     SIRparams.add_parameter('Recovery_rate',lambda zone: fermi.fermi('infrecrates',zone)[1])
     SIRparams.add_parameter('Reinfection_rate',lambda zone: fermi.fermi('infrecrates',zone)[2])
     return SIRparams
 
-
-'''
-Function definitions
-'''
-
+###
+# Function definitions
+###
 
 def infection(t,y,params=[1e-2,1e-3,1e-3]):
     r"""
@@ -115,7 +107,7 @@ def infection(t,y,params=[1e-2,1e-3,1e-3]):
     Args:
        t: time
        y: list of current values of S, I, R
-       params: list of model paramters 
+       params: list of model paramters
     Returns:
         list with contributions of infection process to S, I, R derivatives
 
@@ -133,8 +125,8 @@ def recovery(t,y,params=[1e-2,1e-3,1e-3]):
     Args:
         t: time
         y: list of current values of S, I,R
-        params: list of model paramters 
-    Returns: 
+        params: list of model paramters
+    Returns:
         list with contributions of recovery process to S, I, R derivatives
 
     :math:'\frac{dS}{dt}=0'
@@ -151,7 +143,7 @@ def reinfection(t,y,params=[1e-2,1e-3,1e-3]):
     Args:
         t: time
         y: list of current values of S, I, R
-        params: list of model paramters 
+        params: list of model paramters
     Returns:
     list with contributions of recovery process to S, I, R derivatives
 
@@ -176,7 +168,7 @@ def infectionG(y,params):
        return [-flow,flow,0.0]
     """
     beta=params[0]
-    react=dict()
+    react={}
     react['name']='Infection'
     react['rate']=beta
     react['reactants']={y[0]:1,y[1]:1}
@@ -192,7 +184,7 @@ def recoveryG(y,params):
     return [0.0, -flow,flow]
     """
     rho=params[1]
-    react=dict()
+    react={}
     react['name']='Recovery'
     react['rate']=rho
     react['reactants']={y[1]:1}
@@ -208,7 +200,7 @@ def reinfectionG(y,params):
         return [0.0,flow,-flow]
     """
     beta = params[2]
-    react=dict()
+    react={}
     react['name']='Reinfection'
     react['rate']=beta
     react['reactants']={y[1]:1,y[2]:1}
@@ -228,7 +220,7 @@ def travel(x,y):
        x: population in zone of interest
        y: vector of population in all zones
     Returns:
-       v: vector of rate of travel into zone of interest from each of the zones 
+       v: vector of rate of travel into zone of interest from each of the zones
     """
     # Fraction of Population traveling out of zone a and
     # into zone b per unit time

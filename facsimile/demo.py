@@ -2,9 +2,7 @@
 Demonstration script to assemble, render and run SIR models
 '''
 import scipy.integrate as SI
-import numpy as N
 import pylab as P
-import gillespy2
 import facsimile.SIRexample as S
 import facsimile.framework as F
 
@@ -61,7 +59,9 @@ def simul_o(nreg=3,nproc=2):
     for j in range(len(regions)):
         #P.figure()
         for i in range(len(SIRdyn.variables)):
-            P.plot(tv,[y[i+j*len(SIRdyn.variables)] for y in yv],label= SIRdyn.variables[i]['name'] + ' in Province '+regions[j],linewidth=4)
+            P.plot(tv,[y[i+j*len(SIRdyn.variables)] for y in yv],\
+                   label= SIRdyn.variables[i]['name'] + \
+                   ' in Province '+regions[j],linewidth=4)
     P.grid()
     #P.title('_'.join([f['name'] for f in modelprocesses]))
     P.legend()
@@ -71,10 +71,10 @@ def simul_o(nreg=3,nproc=2):
     P.figure()
     for j in [0,1]:
         for i in [1,2,0]:
-
         #P.figure()
-
-            P.plot(tv,[y[i+j*len(SIRdyn.variables)] for y in yv],label= SIRdyn.variables[i]['name'] + ' in Province '+regions[j],linewidth=4)
+            P.plot(tv,[y[i+j*len(SIRdyn.variables)] for y in yv],\
+                   label= SIRdyn.variables[i]['name'] + \
+                   ' in Province '+regions[j],linewidth=4)
     P.grid()
     #P.title('_'.join([f['name'] for f in modelprocesses]))
     P.legend()
