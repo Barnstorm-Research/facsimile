@@ -169,7 +169,8 @@ Build Dynamics Factor subgraph in  dot format
 
 
 **Args:**
- f: file object 
+ 
+ - <b>`f`</b>:  file object 
 
 
 ---

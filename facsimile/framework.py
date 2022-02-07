@@ -82,7 +82,7 @@ class Dynamics_Factor:
         dot format
         
         Args:
-        f: file object
+            f: file object
         '''
 
         f.write('subgraph clusterDynamics { \n')
