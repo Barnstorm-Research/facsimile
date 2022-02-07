@@ -414,10 +414,10 @@ def build_factors_graph(filename,spacefactor,dynfactor,parfactor):
     """
     Build a graph fo the model factors and save it in dot format.
     Args:
-    filename: Name for the graph file. The extention .dot will be added
-    spacefactor: Space Factor (framework.SpaceFactor)
-    dynfactor: Dynamics Factor (framework.DynamicsFactor)
-    parfactor: Parameters Factor (framework.ParameterFactor)
+       filename: Name for the graph file. The extention .dot will be added
+       spacefactor: Space Factor (framework.Space_Factor)
+       dynfactor: Dynamics Factor (framework.Dynamics_Factor)
+       parfactor: Parameters Factor (framework.Parameter_Factor)
     """
   
     with open(filename+'.dot','w') as f:
