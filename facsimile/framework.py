@@ -309,9 +309,10 @@ Returns:
                                              zip(*map(lambda f:f(t,y,paramf(indexvalue)),dynv))]
     vdyn = list(map(lambda l,indexvalues=indexvalues : \
                     lambda t,y :  dyn(t,y,l),indexvalues))
+    advff=apply_advection(advoper,var,indexvalues)
     vout=lambda t,y,redfun=redfun,vdyn=vdyn :  \
         [sum(a) for a in zip(F.reduce(redfun,vdyn)(t,y),\
-                             apply_advection(advoper,var,indexvalues)(y))]
+                             advff(y))]
     return vout
 
 def apply_advection(advoper, var, indexvalues):
@@ -320,6 +321,7 @@ def apply_advection(advoper, var, indexvalues):
     It's called by distribute only.
     """
     aff=[]
+    print('In Apply_adv')
     for i in range(len(indexvalues)):
         for j in range(len(var)):
             aff.append(lambda y,i=i,j=j: \
