@@ -71,65 +71,64 @@ class Dynamics_Factor:
         '''
         if not moc:
             return self.processes
-        a=sum([f['implementations'] for f in self.processes],[])
+        all_proc=sum([f['implementations'] for f in self.processes],[])
         return  [{'implementation':h['function'],\
-                  'name':h['function'].__name__} for h in a if h['moc']==moc]
+                  'name':h['function'].__name__} for h in all_proc if h['moc']==moc]
 
-    def to_dot (self,f):
+    def to_dot (self,file):
         '''
-        Build Dynamics Factor subgraph in 
-        dot format
-        
+        Build Dynamics Factor subgraph in dot format
         Args:
             f: file object
         '''
 
-        f.write('subgraph clusterDynamics { \n')
-        f.write('label = DYNAMICS_Factor  \n')
+        file.write('subgraph clusterDynamics { \n')
+        file.write('label = DYNAMICS_Factor  \n')
 
     # Dynamics subgraoh
 
-        f.write('subgraph clusterEmpty  { \n')
-        f.write('label = "Diagram" \n fontcolor = black \n')
-        mv=self.variables
-        for l in mv:
-            f.write(l['name']+' [shape=box, fontsize=10,label=<'+l['name']+\
+        file.write('subgraph clusterEmpty  { \n')
+        file.write('label = "Diagram" \n fontcolor = black \n')
+        model_vars=self.variables
+        for model_var in model_vars:
+            file.write(model_var['name']+' [shape=box, fontsize=10,label=<'+model_var['name']+\
                     '<BR /><FONT POINT-SIZE="5">'+ \
-                    ', '.join(l['indices'])+ '</FONT>> ] \n')
+                    ', '.join(model_var['indices'])+ '</FONT>> ] \n')
         indlist=[a['indices'] for a in self.get_processes()]
-        for p,indices  in zip(self.get_processes('ODE'),indlist):
-            f.write(p['name']+' [shape=oval, fontsize=10,label=<'+p['name']+\
+        for proc,indices  in zip(self.get_processes('ODE'),indlist):
+            file.write(proc['name']+' [shape=oval, fontsize=10,label=<'+proc['name']+\
                     '<BR /><FONT POINT-SIZE="5">'+ \
                     ', '.join(indices)+ '</FONT>> ] \n')
-            d=p['implementation'](0,[1 for x in range(len(mv))])
-            sources = [i for i in range(len(d)) if d[i]<0]
-            dest = [i for i in range(len(d)) if d[i]>0]
+            d_values=proc['implementation'](0,[1 for x in range(len(model_vars))])
+            sources = [i for i in range(len(d_values)) if d_values[i]<0]
+            dest = [i for i in range(len(d_values)) if d_values[i]>0]
             for i in sources:
-                f.write(mv[i]['name']+' -> '+p['name'] +'[color=green,penwidth=3]\n')
+                file.write(model_vars[i]['name']+' -> '+proc['name'] +'[color=green,penwidth=3]\n')
             for j in dest:
-                f.write(p['name']+ ' -> ' + mv[j]['name']+ '[color = green,penwidth=3]\n')
-        f.write('}\n') # Close Dynamics subgraph
+                file.write(proc['name']+ ' -> ' + model_vars[j]['name']+ \
+                    '[color = green,penwidth=3]\n')
+        file.write('}\n') # Close Dynamics subgraph
 
     #
     # Build Implementations SubGraph
     #
 
-        f.write('subgraph clusterImplementations  { \n')
-        f.write('label = "Implementations" \n fontcolor = black \n')
+        file.write('subgraph clusterImplementations  { \n')
+        file.write('label = "Implementations" \n fontcolor = black \n')
         start=True
-        for p in self.processes:
-            mocs=[','.join([pm['moc'],pm['source'],'<BR />']) for pm in p['implementations']]
-            f.write(p['name']+'i [shape=oval, fontsize=10,label=<'+p['name']+\
+        for proc in self.processes:
+            mocs=[','.join([pm['moc'],pm['source'],'<BR />']) for pm in proc['implementations']]
+            file.write(proc['name']+'i [shape=oval, fontsize=10,label=<'+proc['name']+\
                     '<BR /><FONT POINT-SIZE="5">'+ \
                     ' '.join(mocs)+ '</FONT>> ] \n')
             if start:
-                lo=p['name']+'i'
+                link_to=proc['name']+'i'
                 start=False
             else:
-                f.write(lo+' -> '+p['name']+'i [style=invis]\n')
-                lo=p['name']+'i'
-        f.write('}\n') # Close Implementations
-        f.write('}\n') # Close Dynamics
+                file.write(link_to+' -> '+proc['name']+'i [style=invis]\n')
+                link_to=proc['name']+'i'
+        file.write('}\n') # Close Implementations
+        file.write('}\n') # Close Dynamics
 
 
 
@@ -172,6 +171,11 @@ class Space_Factor:
 
 
     def get_space(self):
+        '''
+        Create a list object with indices and advections
+        Returns:
+            list of indices with their advections
+        '''
         space=[]
         for ind in self.indices:
             if ind['name'] in self.advections:
@@ -179,42 +183,45 @@ class Space_Factor:
             space.append(ind)
         return space
 
-    def to_dot (self,f):
+    def to_dot (self,file):
+        '''
+        Write to file a subgraph  in dot format with the space factor
+        '''
     #
     # Build Space Factor
     #
 
         mss=self.indices
         mssa=self.advections
-        f.write('subgraph clusterspace { \n')
-        f.write('label = SPACE_Factor  \n')
-        f.write('rankdir=LR \n')
+        file.write('subgraph clusterspace { \n')
+        file.write('label = SPACE_Factor  \n')
+        file.write('rankdir=LR \n')
         start=True
-        for l in mss:
+        for index in mss:
             # Build Index Subgraph
-            f.write('subgraph cluster'+l['name']+' {label ="'+l['name']+'"\n')
-            f.write(l['name']+'a '+' [label="",style=invis,width=0] \n')
-            for value in l['values']:
-                f.write(value+' [shape=box,fontsize=10] \n')
-            f.write('}') # Close Index Subgraph
+            file.write('subgraph cluster'+index['name']+' {label ="'+index['name']+'"\n')
+            file.write(index['name']+'a '+' [label="",style=invis,width=0] \n')
+            for value in index['values']:
+                file.write(value+' [shape=box,fontsize=10] \n')
+            file.write('}') # Close Index Subgraph
             if start:
-                lo=l['name']+'a'
+                link_to=index['name']+'a'
                 start=False
             else:
-                f.write(lo+' -> '+l['name']+'a [style=invis]\n')
-                lo=l['name']+'a'
-            if l['name'] in mssa:
+                file.write(link_to+' -> '+index['name']+'a [style=invis]\n')
+                link_to=index['name']+'a'
+            if index['name'] in mssa:
                 # Add Advection to Index
-                advname=mssa[l['name']]['name']
-                f.write(advname+' [shape=oval,fontsize=10] \n')
-                f.write(lo+ '  -> ' + advname+ \
-                        '[ltail = cluster'+l['name']+\
+                advname=mssa[index['name']]['name']
+                file.write(advname+' [shape=oval,fontsize=10] \n')
+                file.write(link_to+ '  -> ' + advname+ \
+                        '[ltail = cluster'+index['name']+\
                         ',color=blue,penwidth=3]\n')
-                f.write(advname + \
-                        ' -> '+lo+' [lhead = cluster'+l['name']+ \
+                file.write(advname + \
+                        ' -> '+link_to+' [lhead = cluster'+index['name']+ \
                         ',color=blue,penwidth=3] \n')
-                lo=advname
-        f.write('}') # Close Space Factor
+                link_to=advname
+        file.write('}') # Close Space Factor
 
 
 class Parameter_Factor:
@@ -243,24 +250,27 @@ class Parameter_Factor:
         self.parameters.append({'name':name,'implementation':fun})
 
     def get_parameters(self):
+        '''
+        Return List object with the factor parameters
+        '''
         return self.parameters
 
-    def to_dot(self,f):
+    def to_dot(self,file):
         '''
         Build Parameter Factor Subgraph
         In the dot format
         Args:
             f: file object
         '''
-        
 
-        f.write('subgraph clusterparams { \n')
-        f.write('label = Parameters_Factor  \n')
+
+        file.write('subgraph clusterparams { \n')
+        file.write('label = Parameters_Factor  \n')
         #f.write('paramsa '+' [label="",style=invis,width=0] \n')
         #f.write(lo+' -> '+'paramsa [style=invis]\n')
-        for l in self.parameters:
-            f.write(l['name']+' [shape=box, fontsize=10, label='+l['name']+' ] \n')
-        f.write('}') # Close Parameters Factor
+        for param in self.parameters:
+            file.write(param['name']+' [shape=box, fontsize=10, label='+param['name']+' ] \n')
+        file.write('}') # Close Parameters Factor
 
 
 
@@ -300,7 +310,8 @@ Returns:
     vdyn = list(map(lambda l,indexvalues=indexvalues : \
                     lambda t,y :  dyn(t,y,l),indexvalues))
     vout=lambda t,y,redfun=redfun,vdyn=vdyn :  \
-        [sum(a) for a in zip(F.reduce(redfun,vdyn)(t,y) ,  apply_advection(advoper,var,indexvalues)(y))]
+        [sum(a) for a in zip(F.reduce(redfun,vdyn)(t,y),\
+                             apply_advection(advoper,var,indexvalues)(y))]
     return vout
 
 def apply_advection(advoper, var, indexvalues):
@@ -322,6 +333,10 @@ def apply_advection(advoper, var, indexvalues):
 #######################################################
 
 class Distribute_to_gillespie(gillespy2.Model):
+    '''
+    Class to hold model in Gillespie form
+    Inherits from gillespy2.Model
+    '''
 
     def __init__(self, dynfactor,spacefactor,parfactor,initvalue,maxt):
         """
@@ -352,15 +367,15 @@ class Distribute_to_gillespie(gillespy2.Model):
         paramd={}
         params=parfactor.get_parameters()
 
-        for r in modelspace()[0]['values']:
+        for rvalue in modelspace()[0]['values']:
             parameters = []
             #prates= fermi.fermi(parameter_query,r)
-            prates=[p['implementation'](r)  for p in params ]
+            prates=[p['implementation'](rvalue)  for p in params ]
             for i in range(len(prates)):
                 parameters.append(gillespy2.Parameter(
-                    name='k_c'+str(i)+r, expression=prates[i]))
+                    name='k_c'+str(i)+rvalue, expression=prates[i]))
             self.add_parameter(parameters)
-            paramd[r]=parameters
+            paramd[rvalue]=parameters
 
         k_travel=gillespy2.Parameter(name='k_travel', expression=advrate)
         self.add_parameter(k_travel)
@@ -370,12 +385,13 @@ class Distribute_to_gillespie(gillespy2.Model):
         #
 
         speciesd={}
-        for r in modelspace()[0]['values']:
+        for rvalue in modelspace()[0]['values']:
             species=[]
-            for mv in [x['name'] for x in modelvariables()]:
-                species.append(gillespy2.Species(name=mv+r, initial_value=initvalue(mv,r)))
+            for model_var in [x['name'] for x in modelvariables()]:
+                species.append(gillespy2.Species(
+                    name=model_var+rvalue, initial_value=initvalue(model_var,rvalue)))
             self.add_species(species)
-            speciesd[r]=species
+            speciesd[rvalue]=species
         #
         # Processes and Advection
         #
@@ -383,25 +399,26 @@ class Distribute_to_gillespie(gillespy2.Model):
         reactions=[]
         i=0
         modelprocesses=[f['implementation'] for f in dynfactor.get_processes('Gillespie')]
-        for r in modelspace()[0]['values']:
-            species=speciesd[r]
-            parameters=paramd[r]
-            for re in modelprocesses:
-                react=re(species,parameters)
+        for rvalue in modelspace()[0]['values']:
+            species=speciesd[rvalue]
+            parameters=paramd[rvalue]
+            for proc in modelprocesses:
+                react=proc(species,parameters)
                 reactions.append(gillespy2.Reaction(
-                    name=react['name']+r, rate=react['rate'], \
+                    name=react['name']+rvalue, rate=react['rate'], \
                     reactants=react['reactants'],\
                     products=react['products']))
 
         ## Advection
-        for r in modelspace()[0]['values']:
-            species=speciesd[r]
-            parameters=paramd[r]
-            for rd in [ x for x in modelspace()[0]['values'] if x != r]:
-                species1=speciesd[rd]
+        for rvalue in modelspace()[0]['values']:
+            species=speciesd[rvalue]
+            parameters=paramd[rvalue]
+            for rvalue_to in [ x for x in modelspace()[0]['values'] if x != rvalue]:
+                species1=speciesd[rvalue_to]
                 for k in range(len(modelvariables())):
                     reactions.append(gillespy2.Reaction(
-                        name="r_travel"+r+rd+modelvariables()[k]['name'], rate=k_travel,\
+                        name="r_travel"+rvalue+\
+                            rvalue_to+modelvariables()[k]['name'], rate=k_travel,\
                         reactants={species[k]:1}, products={species1[k]:1}))
 
         self.add_reaction(reactions)
@@ -419,22 +436,22 @@ def build_factors_graph(filename,spacefactor,dynfactor,parfactor):
        dynfactor: Dynamics Factor (framework.Dynamics_Factor)
        parfactor: Parameters Factor (framework.Parameter_Factor)
     """
-  
-    with open(filename+'.dot','w') as f:
+
+    with open(filename+'.dot','w') as file:
         #
         # Graph Header
         #
-        f.write('digraph test { \n')
-        f.write('rankdir=TP \n')
-        f.write('forcelabels=true compound=true\n')
-        f.write('graph [fontname = "helvetica"] \n')
-        f.write('node [fontname = "helvetica"] \n')
-        f.write('edge [fontname = "helvetica"] \n')
-        f.write('size="6,2" \n')
-        f.write('ranksep=0.1 \n')
-        f.write('fontsize=10 \n')
+        file.write('digraph test { \n')
+        file.write('rankdir=TP \n')
+        file.write('forcelabels=true compound=true\n')
+        file.write('graph [fontname = "helvetica"] \n')
+        file.write('node [fontname = "helvetica"] \n')
+        file.write('edge [fontname = "helvetica"] \n')
+        file.write('size="6,2" \n')
+        file.write('ranksep=0.1 \n')
+        file.write('fontsize=10 \n')
 
-        spacefactor.to_dot(f)
-        dynfactor.to_dot(f)
-        parfactor.to_dot(f)
-        f.write('}') # Close Graph
+        spacefactor.to_dot(file)
+        dynfactor.to_dot(file)
+        parfactor.to_dot(file)
+        file.write('}') # Close Graph
