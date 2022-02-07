@@ -11,7 +11,7 @@ This module contains the class and method definitions used to compose, modify an
 
 ---
 
-<a href="../../facsimile/framework.py#L268"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L272"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `distribute_to_ode`
 
@@ -35,7 +35,7 @@ distribute_to_ode(space, dynamics, parameters)
 
 ---
 
-<a href="../../facsimile/framework.py#L303"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L307"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `apply_advection`
 
@@ -48,7 +48,7 @@ This is an utility function to apply the advection operator to the whole model. 
 
 ---
 
-<a href="../../facsimile/framework.py#L410"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L414"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>function</kbd> `build_factors_graph`
 
@@ -164,19 +164,22 @@ Get the Dynamic variables for the factor
 to_dot(f)
 ```
 
+Build Dynamics Factor subgraph in  dot format 
 
 
 
+**Args:**
+ f: file object 
 
 
 ---
 
-<a href="../../facsimile/framework.py#L133"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L137"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `Space_Factor`
 Hold the data for a dynamic factor 
 
-<a href="../../facsimile/framework.py#L138"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L142"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -193,7 +196,7 @@ __init__()
 
 ---
 
-<a href="../../facsimile/framework.py#L159"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L163"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `add_advection`
 
@@ -211,7 +214,7 @@ This Method adds a new advection operator to an existing Space Factor
 
 ---
 
-<a href="../../facsimile/framework.py#L148"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L152"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `add_index`
 
@@ -228,7 +231,7 @@ This Method adds a new index type, and the corresponding values to an existing S
 
 ---
 
-<a href="../../facsimile/framework.py#L171"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L175"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `get_space`
 
@@ -242,7 +245,7 @@ get_space()
 
 ---
 
-<a href="../../facsimile/framework.py#L179"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L183"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `to_dot`
 
@@ -257,12 +260,12 @@ to_dot(f)
 
 ---
 
-<a href="../../facsimile/framework.py#L217"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L221"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `Parameter_Factor`
 Hold the data for a dynamic factor 
 
-<a href="../../facsimile/framework.py#L222"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L226"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `__init__`
 
@@ -279,7 +282,7 @@ __init__()
 
 ---
 
-<a href="../../facsimile/framework.py#L231"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L235"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `add_parameter`
 
@@ -296,7 +299,7 @@ This Method adds a new parameter to the Parameter Factor
 
 ---
 
-<a href="../../facsimile/framework.py#L242"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L246"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `get_parameters`
 
@@ -310,7 +313,7 @@ get_parameters()
 
 ---
 
-<a href="../../facsimile/framework.py#L245"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L249"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `to_dot`
 
@@ -321,19 +324,20 @@ to_dot(f)
 Build Parameter Factor Subgraph In the dot format 
 
 **Args:**
- f: file object 
+ 
+ - <b>`f`</b>:  file object 
 
 
 ---
 
-<a href="../../facsimile/framework.py#L321"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L325"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ## <kbd>class</kbd> `Distribute_to_gillespie`
 
 
 
 
-<a href="../../facsimile/framework.py#L323"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
+<a href="../../facsimile/framework.py#L327"><img align="right" style="float:right;" src="https://img.shields.io/badge/-source-cccccc?style=flat-square"></a>
 
 ### <kbd>method</kbd> `__init__`
 

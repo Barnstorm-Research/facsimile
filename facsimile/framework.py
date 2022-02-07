@@ -77,9 +77,13 @@ class Dynamics_Factor:
                   'name':h['function'].__name__} for h in a if h['moc']==moc]
 
     def to_dot (self,f):
-    #
-    # Build Dynamics Factor
-    #
+        '''
+        Build Dynamics Factor subgraph in 
+        dot format
+        
+        Args:
+        f: file object
+        '''
 
         f.write('subgraph clusterDynamics { \n')
         f.write('label = DYNAMICS_Factor  \n')
@@ -247,7 +251,7 @@ class Parameter_Factor:
         Build Parameter Factor Subgraph
         In the dot format
         Args:
-        f: file object
+            f: file object
         '''
         
 
