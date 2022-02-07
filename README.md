@@ -20,7 +20,7 @@ representation for describing, composing, and refining scientific models and con
 The following example demonstrates some of the FACSIMILE capabilities, such as model factoring, model rendering, model composition and multi model-of-computation 
 workflows.
 
-For detailed docuemtnation on the demo, model and framework code please look [here.](facsimile/README.md)
+For detailed documentation on the demo, model and framework code please look [here.](facsimile/README.md)
 
 ## SIR Model
 
