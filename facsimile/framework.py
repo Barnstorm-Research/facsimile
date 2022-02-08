@@ -33,7 +33,7 @@ class Dynamics_Factor:
         '''
         self.variables.append({'name':name,'indices':indices})
 
-    def add_process(self, name,source,moc,fun,indices=[]):
+    def add_process(self, name,source,moc,fun,indices=[],aggregators=[]):
         '''
         This Method adds a model process to an existing Dynamics Factor
         If the process already exists, this method can be used to add addtional
@@ -45,13 +45,14 @@ class Dynamics_Factor:
          fun: Function implementing the process for the model of computation specified
          indices : List of indices the process depends on. (default [])
         '''
+        #print(aggregators)
         names=[p['name'] for p in self.processes]
         imp={'source':source,'moc':moc,'function':fun}
         if name in names:
             i=names.index(name)
             self.processes[i]['implementations'].append(imp)
         else:
-            self.processes.append({'name':name,'implementations':[imp],'indices':indices})
+            self.processes.append({'name':name,'implementations':[imp],'indices':indices,'aggregators':aggregators})
 
     def get_variables(self):
         '''
@@ -71,9 +72,10 @@ class Dynamics_Factor:
         '''
         if not moc:
             return self.processes
-        all_proc=sum([f['implementations'] for f in self.processes],[])
+        all_proc=[h for h in sum([f['implementations'] for f in self.processes],[]) if h['moc']==moc]
+        all_proc=list(zip(all_proc,[f['aggregators']for f in self.processes]))
         return  [{'implementation':h['function'],\
-                  'name':h['function'].__name__} for h in all_proc if h['moc']==moc]
+                  'name':h['function'].__name__,'aggregators':aggregators} for (h,aggregators) in all_proc]
 
     def to_dot (self,file):
         '''
@@ -85,7 +87,7 @@ class Dynamics_Factor:
         file.write('subgraph clusterDynamics { \n')
         file.write('label = DYNAMICS_Factor  \n')
 
-    # Dynamics subgraoh
+    # Dynamics subgraph
 
         file.write('subgraph clusterEmpty  { \n')
         file.write('label = "Diagram" \n fontcolor = black \n')
@@ -95,7 +97,7 @@ class Dynamics_Factor:
                     '<BR /><FONT POINT-SIZE="5">'+ \
                     ', '.join(model_var['indices'])+ '</FONT>> ] \n')
         indlist=[a['indices'] for a in self.get_processes()]
-        for proc,indices  in zip(self.get_processes('ODE'),indlist):
+        for proc,indices ,aggregators in zip(self.get_processes('ODE'),indlist,[p['aggregators']for p in self.get_processes()]):
             file.write(proc['name']+' [shape=oval, fontsize=10,label=<'+proc['name']+\
                     '<BR /><FONT POINT-SIZE="5">'+ \
                     ', '.join(indices)+ '</FONT>> ] \n')
@@ -107,6 +109,11 @@ class Dynamics_Factor:
             for j in dest:
                 file.write(proc['name']+ ' -> ' + model_vars[j]['name']+ \
                     '[color = green,penwidth=3]\n')
+            for (i,agg) in enumerate(aggregators):
+                if  agg=='sum':
+                    file.write(model_vars[i]['name']+'->'+proc['name'] + '[label=<<FONT POINT-SIZE="10"   >'+agg+'</FONT>>]\n')
+                elif  agg=='dirac': 
+                    file.write(model_vars[i]['name']+'->'+proc['name'] +'\n')
         file.write('}\n') # Close Dynamics subgraph
 
     #
@@ -292,28 +299,56 @@ Returns:
 
     # TODO: This assumes one index only
     indexvalues = space.get_space()[0]['values']
-    advoper = space.get_space()[0]['advection']['implementation']
+    if 'advection' in space.get_space()[0]:
+        advoper = space.get_space()[0]['advection']['implementation']
+    else:
+        advoper=[]
     var = [vv['name'] for vv in dynamics.variables]
-
-    dynv= [p['implementation'] for p in dynamics.get_processes('ODE')]
-
-    #paramf=lambda indexv : fermi.fermi(fquery,indexv)
 
     params=parameters.get_parameters()
     def paramf(indexv):
         return [p['implementation'](indexv)  for p in params ]
+    
+    def expand(agg,num_ind_values):
+        def agg_fun(agg,y,i):
+            if agg=='dirac':
+                return y[i]
+            if agg == 'sum':
+                return sum(y)
+            return 0
 
-    redfun=lambda f1,f2: lambda t,x : f1(t,x[:-len(var)])+f2(t,x[-len(var):])
+        num_var=len(agg)
+        return lambda y, i: [agg_fun(agg_e,y[j:num_var*num_ind_values:num_var],i) for (j,agg_e) in enumerate(agg)]
 
-    dyn = lambda t,y,indexvalue,dynv=dynv : [sum(a) for a in \
-                                             zip(*map(lambda f:f(t,y,paramf(indexvalue)),dynv))]
-    vdyn = list(map(lambda l,indexvalues=indexvalues : \
-                    lambda t,y :  dyn(t,y,l),indexvalues))
-    advff=apply_advection(advoper,var,indexvalues)
-    vout=lambda t,y,redfun=redfun,vdyn=vdyn :  \
-        [sum(a) for a in zip(F.reduce(redfun,vdyn)(t,y),\
-                             advff(y))]
-    return vout
+
+    #
+    # all the processes in ODE implementation
+    # with expanded aggregators    
+    # Each process takes as additional argument 
+    # which index value it is applied to
+    #
+    ode_procs= [lambda t,y,parms,i,p=p : p['implementation'](t,expand(p['aggregators'],len(indexvalues))(y,i),parms) for p in dynamics.get_processes('ODE')]
+ 
+    #
+    # Sum all processes for a fixed index value
+    #
+   
+    ode_procs_sum = lambda t,y,params,i :[sum(a) for a in zip(*[op(t,y,params,i) for op in ode_procs])]
+
+    #
+    # repeat processes for all index values
+    #
+    ode_procs_allv = lambda t, y : sum([ode_procs_sum(t,y,paramf(indexvalue),i) for (i,indexvalue) in enumerate(indexvalues)],[])
+
+    #
+    # Add advection
+    #
+    if advoper:
+        advff=apply_advection(advoper,var,indexvalues)
+        redfun=lambda f1,f2: lambda t,x : f1(t,x[:-len(var)])+f2(t,x[-len(var):]) 
+        vout=lambda t,y: [sum(a) for a in zip(ode_procs_allv(t,y),advff(y))]
+        return vout
+    return ode_procs_allv
 
 def apply_advection(advoper, var, indexvalues):
     """
@@ -321,7 +356,6 @@ def apply_advection(advoper, var, indexvalues):
     It's called by distribute only.
     """
     aff=[]
-    print('In Apply_adv')
     for i in range(len(indexvalues)):
         for j in range(len(var)):
             aff.append(lambda y,i=i,j=j: \
@@ -391,7 +425,7 @@ class Distribute_to_gillespie(gillespy2.Model):
             species=[]
             for model_var in [x['name'] for x in modelvariables()]:
                 species.append(gillespy2.Species(
-                    name=model_var+rvalue, initial_value=initvalue(model_var,rvalue)))
+                    name=model_var+rvalue, initial_value=initvalue(model_var,modelspace()[0]['name'],rvalue)))
             self.add_species(species)
             speciesd[rvalue]=species
         #

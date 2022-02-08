@@ -7,7 +7,7 @@ import facsimile.SIRexample as S
 import facsimile.framework as F
 
 
-def simul_o(nreg=3,nproc=2):
+def simul_o(nreg=3,nproc=2,space=0):
     """
     Distribute the SIR Factors into an ODE based simulation
     runs the simulation and plots the results
@@ -20,13 +20,13 @@ def simul_o(nreg=3,nproc=2):
        
     """
 
-    SIRdyn=S.get_dynamics_factor(nproc)
-    SIRspace=S.get_space_factor(nreg)
+    SIRdyn=S.get_dynamics_factor(nproc,space=space)
+    SIRspace=S.get_space_factor(nreg,space=space)
     SIRparams=S.get_parameters_factor()
 
-    print(SIRdyn)
-    print(SIRspace)
-    print(SIRparams)
+    #print(SIRdyn)
+    #print(SIRspace)
+    #print(SIRparams)
 
     model=F.distribute_to_ode(SIRspace,SIRdyn,SIRparams)
 
@@ -35,10 +35,11 @@ def simul_o(nreg=3,nproc=2):
     # simulation
     y0=list()
     mvss=[mm['name'] for mm in SIRdyn.variables]
-    regions=SIRspace.get_space()[0]['values']
-    for r in regions:
+    index=SIRspace.get_space()[0]['name']
+    values=SIRspace.get_space()[0]['values']
+    for r in values:
         for mv in mvss:
-            y0.append(S.init_value(mv,r))
+            y0.append(S.init_value(mv,index,r))
 
     maxt=100 # maximum time of simulation
     out = SI.RK45(model,0,y0,maxt,rtol=1e-5,max_step=0.1,atol=1e-5)
@@ -56,17 +57,17 @@ def simul_o(nreg=3,nproc=2):
     # plot results
     P.figure()
 
-    for j in range(len(regions)):
+    for j in range(len(values)):
         #P.figure()
         for i in range(len(SIRdyn.variables)):
             P.plot(tv,[y[i+j*len(SIRdyn.variables)] for y in yv],\
                    label= SIRdyn.variables[i]['name'] + \
-                   ' in Province '+regions[j],linewidth=4)
+                   ' for  '+values[j],linewidth=4)
     P.grid()
     #P.title('_'.join([f['name'] for f in modelprocesses]))
     P.legend()
 
-    P.savefig(regions[j]+'SIR.pdf')
+    P.savefig(values[j]+'SIR.pdf')
     # plot results
     P.figure()
     for j in [0,1]:
@@ -74,7 +75,7 @@ def simul_o(nreg=3,nproc=2):
         #P.figure()
             P.plot(tv,[y[i+j*len(SIRdyn.variables)] for y in yv],\
                    label= SIRdyn.variables[i]['name'] + \
-                   ' in Province '+regions[j],linewidth=4)
+                   ' for  '+values[j],linewidth=4)
     P.grid()
     #P.title('_'.join([f['name'] for f in modelprocesses]))
     P.legend()

@@ -15,7 +15,7 @@ from  facsimile import  fermi
 # Dynamics Factor
 ###
 
-def get_dynamics_factor(nproc=3):
+def get_dynamics_factor(nproc=3,space=0):
     '''
     Create Dynamics Factor for the SIR model
     There are 3 processes defined in this example, Infection recovery and reinfection
@@ -28,18 +28,24 @@ def get_dynamics_factor(nproc=3):
     Returns:
         sir_df: (frameowrk.DynamicsFactor) SIR Dynamics Factor
     '''
+    spaces=['Region','AgeGroup']
+    agg_list=[[['dirac','dirac','null'],['null','dirac','null'],['null','dirac','dirac']],[['dirac','sum','null'],['null','dirac','null'],['null','sum','dirac']]]
+
+    space_index=space
+
     sir_df=F.Dynamics_Factor()
     for variab in  ['S','I','R']:
-        sir_df.add_variable(variab,['Region'])
+        sir_df.add_variable(variab,[spaces[space_index]])
 
-    for (proc_ode,proc_gilles) in zip([infection,recovery,reinfection][:nproc],\
-                       [infection_G,recovery_G,reinfection_G][:nproc]):
+    for (proc_ode,proc_gilles,aggregators) in zip([infection,recovery,reinfection][:nproc],\
+                       [infection_G,recovery_G,reinfection_G][:nproc],agg_list[space_index]):
         model_proc={}
         model_proc['name']=proc_ode.__name__
         model_proc['implementations']=[]
         source='reference'
+        model_proc['aggregators']=aggregators
         for (moc,fun)  in zip(['ODE','Gillespie'],[proc_ode,proc_gilles]):
-            sir_df.add_process(proc_ode.__name__,source,moc,fun,['Region'])
+            sir_df.add_process(proc_ode.__name__,source,moc,fun,['AgeGroup'],aggregators)
             source='translated'
     return sir_df
 
@@ -48,19 +54,22 @@ def get_dynamics_factor(nproc=3):
 # Space Component
 ###
 
-def get_space_factor(nregions=3):
+def get_space_factor(nvalues=3,space=0):
     '''
     Create Space Factor for the SIR model. There is one index type (Region) with up
     to 5 possible values
     Args:
-        nregions: Number of regions used for the model (default 3)
+        nvalues: Number of regions used for the model (default 3)
     Returns:
         sir_sf: (frameowrk.SpaceFactor) SIR Space Factor
     '''
 
     SIR_space=F.Space_Factor()
-    SIR_space.add_index('Region',['Metroton','Suburbium','Ruralia','Westcosta','Islandii'][:nregions])
-    SIR_space.add_advection('Travel','Region',travel)
+    if space==1:
+        SIR_space.add_index('AgeGroup',['Young','Middle','Senior'][:nvalues])
+    else:   
+        SIR_space.add_index('Region',['Metroton','Suburbium','Ruralia','Westcosta','Islandii'][:nvalues])
+        SIR_space.add_advection('Travel','Region',travel)
     return SIR_space
 
 ###
@@ -68,7 +77,7 @@ def get_space_factor(nregions=3):
 ###
 
 
-def init_value(variable,zone):
+def init_value(variable,index,value):
     """
     Return the initial value for a variable in a given Region
     Args:
@@ -77,18 +86,29 @@ def init_value(variable,zone):
     Returns:
         iv: initial value for the variable in the region
     """
+    inits={}
+    inits['Region']={'Metroton':{'S':1000,'I':0,'R':0},\
+            'Suburbium':{'S':1000,'I':0,'R':0},\
+            'Westcosta':{'S':1000,'I':0,'R':0},\
+            'Islandii':{'S':1000,'I':0,'R':0},\
+            'Ruralia':{'S':1000,'I':100,'R':0}}
+    inits['AgeGroup']={'Young':{'S':9000,'I':100,'R':0},\
+            'Middle':{'S':15000,'I':0,'R':0},\
+            'Senior':{'S':3000,'I':0,'R':0}}        
+    return inits[index][value][variable]
+    """
     init_value=0
     if variable == 'S':
         init_value=1000
     elif variable == 'I':
-        if zone=='Ruralia':
+        if zone=='Young':
             init_value=100
         elif zone == 'Westcosta':
             init_value=10
         else:
             init_value=0
     return init_value
-
+    """
 def get_parameters_factor():
 
     SIR_params=F.Parameter_Factor()
