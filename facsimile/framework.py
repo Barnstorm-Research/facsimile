@@ -2,7 +2,7 @@
 This module contains the class and method definitions used to compose, modify and
 render factored models into executable simulations
 '''
-
+import abc
 import pprint
 import functools as F
 import pylab as P
@@ -338,14 +338,42 @@ def apply_advection(advoper, var, indexvalues):
 # Model rendering and simulation  FUNCTIONS
 #######################################################
 
+
+class StateTransitionTool(abc.ABC):
+    """
+    Abstract class that works with a StateMachineAgent to generate an event when transitioning from an event
+    """
+
+    def __init__(self,startState:int):
+        self.startState = startState
+
+    @abc.abstractmethod
+    def run(self,env:spy.Environment,agent:'StateMachineAgent') -> Generator[spy.Event,None,None]:
+        """
+        Return a generator that yiels simpy Events. These are executed BEFORE the state is transitioned to
+        :param env:
+        :return:
+        """
+        pass
+
+    @abc.abstractmethod
+    def getNextState(self,env:spy.Environment,agent:'StateMachineAgent'):
+        """
+        Get the state to transition to after run finishes. The tool can transition to the current state.
+        :param env:
+        :param agent:
+        :return:
+        """
+        pass
+
 class StateMachineAgent(object):
     """
     An agent whose state is discrete and evolves according to a graph.
     """
 
-    def __init__(self,spatialIndices:List[str],
+    def __init__(self,parameters,spatialIndices:List[str],
                  transitionGraph:nx.DiGraph,
-                 transitionEvtGens:Dict[Tuple[int,int],Callable[[spy.Environment,'StateMachineAgent'],Generator[spy.Event,None,None]]],
+                 transitionEvtGens:Dict[int,StateTransitionTool],
                  startState:int,
                  startSpatial:str,
                  edgeProbName:str="probability"):
@@ -355,13 +383,14 @@ class StateMachineAgent(object):
         :param transitionGraph: The graph of states this agent can transition among. Each edge must have an attribute
         of the name edgeProbName that indicates the probability of choosing that edge to transition along among the others from a
         given state.
-        :param transitionEvtGens: When the agent transitions, it needs to yield an event. This is a mapping from edge
-        to function. The edge is a tuple of the previous and next states. The callable takes in the simulation environment
-        and the agent that is transitioning. The Callable should return a Generator that yields Events.
+        :param transitionEvtGens: The agent repeatedly has the chance to transition from the current state. This maps from
+        the current state to the tool the agent should use to learn what state to transition to next and what to do before
+        then
         :param startState: The starting state, an int which is a node on the transitionGraph
         :param startSpatial: The starting spatial index value.
         :param edgeProbName: The attribute name on edges indicating the probability value
         """
+        self.parameters = parameters
         self.spatialIndices = spatialIndices
         self.startRegion = startSpatial
         self.transitionG = transitionGraph
@@ -371,14 +400,20 @@ class StateMachineAgent(object):
 
     def transition(self,env:spy.Environment):
         """
-
-        :param env:
-        :return:
+        A generator that will continually transition until we reach a terminating state
+        :param env: The current simulation environment
+        :return: Generator of spy.Process
         """
         edgeView = list(self.transitionG.out_edges([self.currentState],self.edgeProbName)) # Get edges from current state
-        edgeIndex = np.random.choice(len(edgeView),1,p=[e[2] for e in edgeView]) # Choose an edge to transition along
-        startState,targetState,_ = edgeView[edgeIndex]
-        return env.process(self.transitionEvtGens[(startState,targetState)](env,self))
+        if len(edgeView) > 0:
+            transTool = self.transitionEvtGens[self.currentState]
+            nxtState = transTool.getNextState(env,self)
+            if nxtState in [e[1] for e in edgeView]:
+                yield env.process(transTool.run(env,self))
+                self.currentState = nxtState
+                self.transition(env)
+            else:
+                raise Exception("Next state invalid! %s"%nxtState)
 
 class Distribute_to_ABM(object):
 

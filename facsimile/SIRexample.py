@@ -3,8 +3,13 @@ an SIR epidemics model. These factors can be composed, modified, and rendered in
 executable modelsusing the tools of the FACSIMILE framework
 '''
 
+import simpy as spy
+import numpy as np
+
 from facsimile import framework as F
 from  facsimile import  fermi
+from typing import Iterator
+from dataclasses import dataclass
 
 ###
 # SIR Model Factors Definition
@@ -156,6 +161,31 @@ def reinfection(t,y,params=[1e-2,1e-3,1e-3]):
     flow=y[1]*y[2]*beta
     return [0.0,flow,-flow]
 
+# Agent-Based Model Implementation
+
+@dataclass
+class SIRABMParams:
+    """
+    Parameters needed for SIR agent-based model
+    """
+
+    probInfection:float
+    timeToRecovery:float
+
+
+def infection_ABM(env:spy.Environment,agent:F.StateMachineAgent,) -> float:
+    """
+    The infection "process" in an ABM is the probability that an agent becomes infected att the given time-step.
+    :param env:
+    :param agent:
+    :return:
+    """
+    params:SIRABMParams = agent.parameters
+    
+    isInfected = np.random.choice(2,1,p=[params.probInfection,1.0-params.probInfection])
+    if isInfected:
+
+    yield env.Time
 
 # Translation of reference implementation
 
