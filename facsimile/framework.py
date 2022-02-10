@@ -7,7 +7,11 @@ import pprint
 import functools as F
 import pylab as P
 import gillespy2
+import numpy as np
+import networkx as nx
+import simpy as spy
 
+from typing import List, Dict, Tuple, Callable, Generator
 
 
 class Dynamics_Factor:
@@ -333,6 +337,56 @@ def apply_advection(advoper, var, indexvalues):
 #######################################################
 # Model rendering and simulation  FUNCTIONS
 #######################################################
+
+class StateMachineAgent(object):
+    """
+    An agent whose state is discrete and evolves according to a graph.
+    """
+
+    def __init__(self,spatialIndices:List[str],
+                 transitionGraph:nx.DiGraph,
+                 transitionEvtGens:Dict[Tuple[int,int],Callable[[spy.Environment,'StateMachineAgent'],Generator[spy.Event,None,None]]],
+                 startState:int,
+                 startSpatial:str,
+                 edgeProbName:str="probability"):
+        """
+        Construct a agent that transitions probabilistically from state to state.
+        :param spatialIndices: The names of the spatial regions that the agent can reside in.
+        :param transitionGraph: The graph of states this agent can transition among. Each edge must have an attribute
+        of the name edgeProbName that indicates the probability of choosing that edge to transition along among the others from a
+        given state.
+        :param transitionEvtGens: When the agent transitions, it needs to yield an event. This is a mapping from edge
+        to function. The edge is a tuple of the previous and next states. The callable takes in the simulation environment
+        and the agent that is transitioning. The Callable should return a Generator that yields Events.
+        :param startState: The starting state, an int which is a node on the transitionGraph
+        :param startSpatial: The starting spatial index value.
+        :param edgeProbName: The attribute name on edges indicating the probability value
+        """
+        self.spatialIndices = spatialIndices
+        self.startRegion = startSpatial
+        self.transitionG = transitionGraph
+        self.transitionEvtGens = transitionEvtGens
+        self.currentState = startState
+        self.edgeProbName = edgeProbName
+
+    def transition(self,env:spy.Environment):
+        """
+
+        :param env:
+        :return:
+        """
+        edgeView = list(self.transitionG.out_edges([self.currentState],self.edgeProbName)) # Get edges from current state
+        edgeIndex = np.random.choice(len(edgeView),1,p=[e[2] for e in edgeView]) # Choose an edge to transition along
+        startState,targetState,_ = edgeView[edgeIndex]
+        return env.process(self.transitionEvtGens[(startState,targetState)](env,self))
+
+class Distribute_to_ABM(object):
+
+    def __init__(self,dynFactor:Dynamics_Factor,spaceFactor:Space_Factor,
+                 paramsFactor:Parameter_Factor):
+        pass
+
+
 
 class Distribute_to_gillespie(gillespy2.Model):
     '''
