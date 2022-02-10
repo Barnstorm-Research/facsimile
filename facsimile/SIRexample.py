@@ -30,22 +30,22 @@ def get_dynamics_factor(nproc=3,space=0):
     '''
     spaces=['Region','AgeGroup']
     agg_list=[[['dirac','dirac','null'],['null','dirac','null'],['null','dirac','dirac']],[['dirac','sum','null'],['null','dirac','null'],['null','sum','dirac']]]
-
+    agg_list.reverse()
     space_index=space
 
     sir_df=F.Dynamics_Factor()
     for variab in  ['S','I','R']:
-        sir_df.add_variable(variab,[spaces[space_index]])
+        sir_df.add_variable(variab,spaces)
 
     for (proc_ode,proc_gilles,aggregators) in zip([infection,recovery,reinfection][:nproc],\
-                       [infection_G,recovery_G,reinfection_G][:nproc],agg_list[space_index]):
+                       [infection_G,recovery_G,reinfection_G][:nproc],agg_list):
         model_proc={}
         model_proc['name']=proc_ode.__name__
         model_proc['implementations']=[]
         source='reference'
-        model_proc['aggregators']=aggregators
+        model_proc['aggregators']=agg_list
         for (moc,fun)  in zip(['ODE','Gillespie'],[proc_ode,proc_gilles]):
-            sir_df.add_process(proc_ode.__name__,source,moc,fun,['AgeGroup'],aggregators)
+            sir_df.add_process(proc_ode.__name__,source,moc,fun,spaces,agg_list)
             source='translated'
     return sir_df
 
@@ -65,15 +65,21 @@ def get_space_factor(nvalues=3,space=0):
     '''
 
     SIR_space=F.Space_Factor()
+    '''
     if space==1:
         SIR_space.add_index('AgeGroup',['Young','Middle','Senior'][:nvalues])
     else:   
         SIR_space.add_index('Region',['Metroton','Suburbium','Ruralia','Westcosta','Islandii'][:nvalues])
         SIR_space.add_advection('Travel','Region',travel)
     return SIR_space
+    '''
+    SIR_space.add_index('Region',['Metroton','Suburbium','Ruralia','Westcosta','Islandii'][:2])
+    SIR_space.add_advection('Travel','Region',travel)
 
+    SIR_space.add_index('AgeGroup',['Young','Middle','Senior'][:2])
+    return SIR_space
 ###
-# Parameters Factor
+# Parameters1 Factor
 ###
 
 
@@ -87,8 +93,8 @@ def init_value(variable,index,value):
         iv: initial value for the variable in the region
     """
     inits={}
-    inits['Region']={'Metroton':{'S':1000,'I':0,'R':0},\
-            'Suburbium':{'S':1000,'I':0,'R':0},\
+    inits['Region']={'Metroton':{'S':1000,'I':100,'R':0},\
+            'Suburbium':{'S':1000,'I':100,'R':0},\
             'Westcosta':{'S':1000,'I':0,'R':0},\
             'Islandii':{'S':1000,'I':0,'R':0},\
             'Ruralia':{'S':1000,'I':100,'R':0}}

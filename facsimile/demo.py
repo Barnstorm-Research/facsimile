@@ -1,6 +1,7 @@
 '''
 Demonstration script to assemble, render and run SIR models
 '''
+import itertools
 import scipy.integrate as SI
 import pylab as P
 import facsimile.SIRexample as S
@@ -35,12 +36,16 @@ def simul_o(nreg=3,nproc=2,space=0):
     # simulation
     y0=list()
     mvss=[mm['name'] for mm in SIRdyn.variables]
-    index=SIRspace.get_space()[0]['name']
+    indices=[id['name'] for id in SIRspace.get_space()]
     values=SIRspace.get_space()[0]['values']
-    for r in values:
+    values1=SIRspace.get_space()[1]['values']
+    for (r,r1) in   itertools.product(values,values1):
         for mv in mvss:
-            y0.append(S.init_value(mv,index,r))
-
+            y0.append(S.init_value(mv,indices[0],r))
+    #y0=range(27)
+    y0[1]=0    
+    print(y0)
+    y0[1]=0
     maxt=100 # maximum time of simulation
     out = SI.RK45(model,0,y0,maxt,rtol=1e-5,max_step=0.1,atol=1e-5)
     tv=list()
@@ -56,30 +61,30 @@ def simul_o(nreg=3,nproc=2,space=0):
 
     # plot results
     P.figure()
-
-    for j in range(len(values)):
+    for j,vpair in  enumerate(itertools.product(values,values1)):
+        #for j in range(len(values)):
         #P.figure()
         for i in range(len(SIRdyn.variables)):
             P.plot(tv,[y[i+j*len(SIRdyn.variables)] for y in yv],\
                    label= SIRdyn.variables[i]['name'] + \
-                   ' for  '+values[j],linewidth=4)
+                   ' for  '+str(vpair),linewidth=4)
     P.grid()
     #P.title('_'.join([f['name'] for f in modelprocesses]))
     P.legend()
 
-    P.savefig(values[j]+'SIR.pdf')
+    #P.savefig(values[j]+'SIR.pdf')
     # plot results
-    P.figure()
-    for j in [0,1]:
-        for i in [1,2,0]:
+    #P.figure()
+    #for j in [0,1]:
+    #    for i in [1,2,0]:
         #P.figure()
-            P.plot(tv,[y[i+j*len(SIRdyn.variables)] for y in yv],\
-                   label= SIRdyn.variables[i]['name'] + \
-                   ' for  '+values[j],linewidth=4)
-    P.grid()
+    #        P.plot(tv,[y[i+j*len(SIRdyn.variables)] for y in yv],\
+    #               label= SIRdyn.variables[i]['name'] + \
+    #               ' for  '+values[j],linewidth=4)
+    #P.grid()
     #P.title('_'.join([f['name'] for f in modelprocesses]))
-    P.legend()
-    P.savefig('SIRGcolors.png')
+    #P.legend()
+    #P.savefig('SIRGcolors.png')
 
     return [tv,yv],model
 

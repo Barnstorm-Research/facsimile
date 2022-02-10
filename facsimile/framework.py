@@ -2,7 +2,7 @@
 This module contains the class and method definitions used to compose, modify and
 render factored models into executable simulations
 '''
-
+import itertools
 import pprint
 import functools as F
 import pylab as P
@@ -45,7 +45,6 @@ class Dynamics_Factor:
          fun: Function implementing the process for the model of computation specified
          indices : List of indices the process depends on. (default [])
         '''
-        #print(aggregators)
         names=[p['name'] for p in self.processes]
         imp={'source':source,'moc':moc,'function':fun}
         if name in names:
@@ -296,9 +295,54 @@ Args:
 Returns:
     model: ODE function with the signature expected by scipy integrate
     """
+    def paramf(indexv):
+        return [p['implementation'](indexv)  for p in params ]
+    
+    def expand(agg_all,index_value_len):
+        #print(agg_all)
+        def agg_fun(agg,y,i):
+            #print(i,y,agg)
+            if agg=='dirac':
+                return y[i]
+            if agg == 'sum':
+                return sum(y)
+            return 0
+        agg_lambda=[]
+        tot_ind_values=1
+
+        def lambda_1 (k,inside_len,num_vars,num_vals,agg_in):
+            #print(k,inside_len)
+            return lambda y, i: [agg_fun(agg_e,y[var_n+k*inside_len:num_vars*num_vals[-1]+k*inside_len:num_vars],i) for var_n,agg_e in enumerate(agg_in[-1])]
+        def lambda_2(agg_in,num_vals,inside_len):
+            return lambda y, i: sum([b for b in [index_recurse(agg_in[:-1],num_vals[:-1],prod_all[:-1],inside_len,k)(y,i%prod_all[-1]) for k in range(num_vals[-1])]],[])  
+
+
+        def index_recurse(agg_in,num_vals,prod_all,inside_len,k):
+
+            num_vars=len(agg_in[-1])
+            #print(num_vars)
+            if len(num_vals)==1:
+                return lambda_1 (k,inside_len,num_vars,num_vals,agg_in)
+            inside_len=inside_len*num_vars*num_vals[-2]
+            return lambda_2(agg_in,num_vals,inside_len)
+        
+        num_vars=len(agg_all[-1])
+        prod_all=[index_value_len[0] for v in index_value_len]
+        for i,v in enumerate(index_value_len[1:]):
+            prod_all[i] = prod_all[i-1]*v
+        #prod_all.reverse()   
+        aa=index_recurse(agg_all,index_value_len,prod_all,1,0)
+        
+        #print(aa(list(range(27)),0))   
+        return aa
+    
+
 
     # TODO: This assumes one index only
-    indexvalues = space.get_space()[0]['values']
+    #indexvalues = space.get_space()[0]['values']
+    #index_values=list(itertools.product(*[pa['values'] for pa in reversed(space.get_space())]))
+    index_values=list(itertools.product(*[list(range(len(pa['values']))) for pa in space.get_space()]))
+    index_value_len=[len(pa['values']) for pa in space.get_space()]
     if 'advection' in space.get_space()[0]:
         advoper = space.get_space()[0]['advection']['implementation']
     else:
@@ -306,20 +350,6 @@ Returns:
     var = [vv['name'] for vv in dynamics.variables]
 
     params=parameters.get_parameters()
-    def paramf(indexv):
-        return [p['implementation'](indexv)  for p in params ]
-    
-    def expand(agg,num_ind_values):
-        def agg_fun(agg,y,i):
-            if agg=='dirac':
-                return y[i]
-            if agg == 'sum':
-                return sum(y)
-            return 0
-
-        num_var=len(agg)
-        return lambda y, i: [agg_fun(agg_e,y[j:num_var*num_ind_values:num_var],i) for (j,agg_e) in enumerate(agg)]
-
 
     #
     # all the processes in ODE implementation
@@ -327,7 +357,19 @@ Returns:
     # Each process takes as additional argument 
     # which index value it is applied to
     #
-    ode_procs= [lambda t,y,parms,i,p=p : p['implementation'](t,expand(p['aggregators'],len(indexvalues))(y,i),parms) for p in dynamics.get_processes('ODE')]
+
+    dynode=dynamics.get_processes('ODE')
+    print([d['name'] for d in dynode])
+    agg_all=[p['aggregators'] for p in dynode][0]
+    pprint.pprint(agg_all)
+    #agg_all.reverse()
+    agg_all=list(zip(*agg_all))
+    pprint.pprint(agg_all)
+    print(len(dynode))
+    #print(index_values)
+    ode_procs= [lambda t,y,parms,i, k=k,p=p: \
+        p['implementation'](t,expand(agg_all[k],index_value_len)(y,i),parms) \
+            for k, p in enumerate(dynode)]
  
     #
     # Sum all processes for a fixed index value
@@ -338,13 +380,14 @@ Returns:
     #
     # repeat processes for all index values
     #
-    ode_procs_allv = lambda t, y : sum([ode_procs_sum(t,y,paramf(indexvalue),i) for (i,indexvalue) in enumerate(indexvalues)],[])
+    print(index_values)
+    ode_procs_allv = lambda t, y : sum([ode_procs_sum(t,y,paramf(indexvalue),i) for (i,indexvalue) in enumerate(index_values)],[])
 
     #
     # Add advection
     #
     if advoper:
-        advff=apply_advection(advoper,var,indexvalues)
+        advff=apply_advection(advoper,var,index_values)
         redfun=lambda f1,f2: lambda t,x : f1(t,x[:-len(var)])+f2(t,x[-len(var):]) 
         vout=lambda t,y: [sum(a) for a in zip(ode_procs_allv(t,y),advff(y))]
         return vout
@@ -356,7 +399,7 @@ def apply_advection(advoper, var, indexvalues):
     It's called by distribute only.
     """
     aff=[]
-    for i in range(len(indexvalues)):
+    for (i,ivalue) in enumerate(indexvalues):
         for j in range(len(var)):
             aff.append(lambda y,i=i,j=j: \
                       advoper(y[j+i*len(var)],y[j:len(var)*(len(indexvalues)):len(var)]))
