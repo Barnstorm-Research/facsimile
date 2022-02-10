@@ -11,7 +11,7 @@ import numpy as np
 import networkx as nx
 import simpy as spy
 
-from typing import List, Dict, Tuple, Callable, Generator
+from typing import List, Dict, Tuple, Callable, Generator, Iterable, Any
 
 
 class Dynamics_Factor:
@@ -338,6 +338,23 @@ def apply_advection(advoper, var, indexvalues):
 # Model rendering and simulation  FUNCTIONS
 #######################################################
 
+#########################################
+# Agent-Based Modelling Stuff
+#########################################
+
+class WorldModel(object):
+    """
+    Contains all the "stuff" in the simulation
+    """
+
+    def __init__(self,env:spy.Environment,agents:Dict[str,'StateMachineAgent'],
+                 globalParams:Dict[str,Any]):
+        self.env = env
+        self.agents = agents
+        self.globParams = globalParams
+
+    def getNeighbors(self,agent:'StateMachineAgent') -> Iterable['StateMachineAgent']:
+        return filter(lambda agentI: agent.currentSpatialIndex==agentI.currentSpatialIndex,self.agents.values())
 
 class StateTransitionTool(abc.ABC):
     """
@@ -348,7 +365,7 @@ class StateTransitionTool(abc.ABC):
         self.startState = startState
 
     @abc.abstractmethod
-    def run(self,env:spy.Environment,agent:'StateMachineAgent') -> Generator[spy.Event,None,None]:
+    def run(self,wm:WorldModel,agent:'StateMachineAgent') -> Generator[spy.Event,None,None]:
         """
         Return a generator that yiels simpy Events. These are executed BEFORE the state is transitioned to
         :param env:
@@ -357,7 +374,7 @@ class StateTransitionTool(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def getNextState(self,env:spy.Environment,agent:'StateMachineAgent'):
+    def getNextState(self,wm:WorldModel,agent:'StateMachineAgent') -> int:
         """
         Get the state to transition to after run finishes. The tool can transition to the current state.
         :param env:
@@ -365,6 +382,24 @@ class StateTransitionTool(abc.ABC):
         :return:
         """
         pass
+
+class DelegateTransitionTool(StateTransitionTool):
+    """
+    Implementation that delegate to functions provided in constructor
+    """
+
+    def __init__(self,startState:int,
+                 runDel:Callable[[WorldModel,'StateMachineAgent'],Generator[spy.Event,None,None]],
+                nextStateDel:Callable[[WorldModel,'StateMachineAgent'],int]):
+        StateTransitionTool.__init__(self,startState)
+        self.runDel = runDel
+        self.nextStateDel = nextStateDel
+
+    def run(self,wm:WorldModel,agent:'StateMachineAgent') -> Generator[spy.Event,None,None]:
+        return self.runDel(wm,agent)
+
+    def getNextState(self,wm:WorldModel,agent:'StateMachineAgent') -> int:
+        return self.nextStateDel(wm,agent)
 
 class StateMachineAgent(object):
     """
@@ -392,26 +427,29 @@ class StateMachineAgent(object):
         """
         self.parameters = parameters
         self.spatialIndices = spatialIndices
-        self.startRegion = startSpatial
+        self.currentSpatialIndex = startSpatial
         self.transitionG = transitionGraph
         self.transitionEvtGens = transitionEvtGens
         self.currentState = startState
         self.edgeProbName = edgeProbName
 
-    def transition(self,env:spy.Environment):
+    def getAgentsInRegion(self) -> int:
+        raise Exception("Agents in Region not Implemented")
+
+    def transition(self,wm:WorldModel):
         """
         A generator that will continually transition until we reach a terminating state
         :param env: The current simulation environment
         :return: Generator of spy.Process
         """
-        edgeView = list(self.transitionG.out_edges([self.currentState],self.edgeProbName)) # Get edges from current state
+        edgeView = list(self.transitionG.out_edges([self.currentState])) # Get edges from current state
         if len(edgeView) > 0:
             transTool = self.transitionEvtGens[self.currentState]
-            nxtState = transTool.getNextState(env,self)
+            nxtState = transTool.getNextState(wm,self)
             if nxtState in [e[1] for e in edgeView]:
-                yield env.process(transTool.run(env,self))
+                yield wm.env.process(transTool.run(wm,self))
                 self.currentState = nxtState
-                self.transition(env)
+                self.transition(wm)
             else:
                 raise Exception("Next state invalid! %s"%nxtState)
 
@@ -419,9 +457,15 @@ class Distribute_to_ABM(object):
 
     def __init__(self,dynFactor:Dynamics_Factor,spaceFactor:Space_Factor,
                  paramsFactor:Parameter_Factor):
-        pass
+        spatials = spaceFactor.get_space()
+        dynamicsProcs = dynFactor.get_processes()
+        dynamicsVars = dynFactor.get_variables()
+        parameters = paramsFactor.parameters
 
-
+        # Build state graph
+        stateGraph = nx.DiGraph()
+        stateGraph.add_edges_from(list(range(list(dynamicsVars))))
+        x = 10
 
 class Distribute_to_gillespie(gillespy2.Model):
     '''

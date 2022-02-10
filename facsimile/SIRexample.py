@@ -8,7 +8,7 @@ import numpy as np
 
 from facsimile import framework as F
 from  facsimile import  fermi
-from typing import Iterator
+from typing import Iterator, List
 from dataclasses import dataclass
 
 ###
@@ -19,6 +19,27 @@ from dataclasses import dataclass
 ###
 # Dynamics Factor
 ###
+
+def get_ABM_dynamics_factor(npro=3):
+    """
+    Create Dynamics Factor with only an ABM dynamics
+    :param npro: The number of processes
+    :return:
+    """
+    sir_df=F.Dynamics_Factor()
+    for varName in  ['S','I','R']:
+        sir_df.add_variable(varName,['Region'])
+
+    for processABM in [infection_ABM]:
+        model_proc={}
+        model_proc['name']=processABM.__name__
+        model_proc['implementations']=[]
+        source='reference'
+        for (moc,fun)  in zip(['ABM'],[processABM]):
+            sir_df.add_process(processABM.__name__,source,moc,fun,['Region'])
+            source='translated'
+    return sir_df
+
 
 def get_dynamics_factor(nproc=3):
     '''
@@ -172,20 +193,33 @@ class SIRABMParams:
     probInfection:float
     timeToRecovery:float
 
-
-def infection_ABM(env:spy.Environment,agent:F.StateMachineAgent,) -> float:
+def recovery_ABM(y:List[float],params:List[float]) -> float:
     """
-    The infection "process" in an ABM is the probability that an agent becomes infected att the given time-step.
-    :param env:
-    :param agent:
+    The recovery "process" in an ABM is the probability that an agent recovers in the next time step.
+    :param y: Count of susceptible, infected, and recovered agents, in that order
+    :param params: probability of agent-agent interaction being infectious, recovery rate.
     :return:
     """
-    params:SIRABMParams = agent.parameters
-    
-    isInfected = np.random.choice(2,1,p=[params.probInfection,1.0-params.probInfection])
-    if isInfected:
+    return params[1]
 
-    yield env.Time
+def infection_ABM(y:List[float],params:List[float]) -> float:
+    """
+    The infection "process" in an ABM is the probability that an agent becomes infected at the given time-step.
+    :param y: List of the count of susceptible agents, infected agents, and recovered agents "nearby"
+    :param params: The list of parameters: probability that single agent-agent interaction results in infection, recovery rate
+    :return: Probability that this agent will become infected
+    """
+    s,i,r = y
+    a,b = params
+    if i == 0:
+        return 0.0 # If there are no infected agents, then we cannot become infected
+    else:
+        totalProb = 0.0
+        fct = np.math.factorial
+        nChK = lambda n,k: fct(n)/(fct(k)*fct(n-k)) # n choose k
+        for numInfected in range(1,i+1):
+            totalProb += (a**numInfected)*((i-numInfected)**(1-a))*nChK(i,numInfected)
+        return totalProb
 
 # Translation of reference implementation
 
