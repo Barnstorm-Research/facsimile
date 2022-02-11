@@ -60,17 +60,42 @@ def simul_o(nreg=3,nproc=2,space=0):
 
     # plot results
     P.figure()
+    yy=[]
     for j,vpair in  enumerate(itertools.product(values,values1)):
         #for j in range(len(values)):
         #P.figure()
         for i in range(len(SIRdyn.variables)):
-            P.plot(tv,[y[i+j*len(SIRdyn.variables)] for y in yv],\
+            yy.append([y[i+j*len(SIRdyn.variables)] for y in yv])
+            P.plot(tv,yy[-1],\
                    label= SIRdyn.variables[i]['name'] + \
                    ' for  '+str(vpair),linewidth=4)
+        
     P.grid()
     #P.title('_'.join([f['name'] for f in modelprocesses]))
     P.legend()
-
+    n_vars=len(SIRdyn.variables)
+    P.figure()  
+    for j, val in enumerate(values):
+        for i in range(n_vars):
+           
+            ys=[sum(a) for a in zip(*yy[j*len(values1)*n_vars+i:(j+1)*len(values1)*n_vars+i:n_vars])]
+            P.plot(tv,ys,\
+                   label= SIRdyn.variables[i]['name'] + \
+                   ' for  '+val,linewidth=4)
+    P.grid()
+    #P.title('_'.join([f['name'] for f in modelprocesses]))
+    P.legend()
+    P.figure()  
+    for j, val in enumerate(values1):
+        for i in range(n_vars):
+           
+            ys=[sum(a) for a in zip(*yy[j*len(values)*n_vars+i:(j+1)*len(values)*n_vars+i:n_vars])]
+            P.plot(tv,ys,\
+                   label= SIRdyn.variables[i]['name'] + \
+                   ' for  '+val,linewidth=4)
+    P.grid()
+    #P.title('_'.join([f['name'] for f in modelprocesses]))
+    P.legend()
     #P.savefig(values[j]+'SIR.pdf')
     # plot results
     #P.figure()
