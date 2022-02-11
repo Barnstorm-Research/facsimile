@@ -43,9 +43,8 @@ def simul_o(nreg=3,nproc=2,space=0):
         for mv in mvss:
             y0.append(S.init_value(mv,indices[0],r))
     #y0=range(27)
-    y0[1]=0    
-    print(y0)
-    y0[1]=0
+    
+    y0=[3000, 0, 0, 2000, 100, 0, 1000, 0, 0, 2250, 100, 0,900, 100, 0, 1250, 0, 0]
     maxt=100 # maximum time of simulation
     out = SI.RK45(model,0,y0,maxt,rtol=1e-5,max_step=0.1,atol=1e-5)
     tv=list()

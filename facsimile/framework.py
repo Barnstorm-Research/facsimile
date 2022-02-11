@@ -298,7 +298,7 @@ Returns:
     def paramf(indexv):
         return [p['implementation'](indexv)  for p in params ]
     
-    def expand(agg_all,index_value_len):
+    def expand(agg_all,index_value_len,y,i):
         #print(agg_all)
         def agg_fun(agg,y,i):
             #print(i,y,agg)
@@ -310,28 +310,39 @@ Returns:
         agg_lambda=[]
         tot_ind_values=1
 
-        def lambda_1 (k,inside_len,num_vars,num_vals,agg_in):
-            #print(k,inside_len)
-            return lambda y, i: [agg_fun(agg_e,y[var_n+k*inside_len:num_vars*num_vals[-1]+k*inside_len:num_vars],i) for var_n,agg_e in enumerate(agg_in[-1])]
-        def lambda_2(agg_in,num_vals,inside_len):
-            return lambda y, i: sum([b for b in [index_recurse(agg_in[:-1],num_vals[:-1],prod_all[:-1],inside_len,k)(y,i%prod_all[-1]) for k in range(num_vals[-1])]],[])  
+ 
 
-
-        def index_recurse(agg_in,num_vals,prod_all,inside_len,k):
-
+        def index_recurse(agg_in,num_vals,prod_all,inside_len,k,y,i):
+            def lambda_1 (k,inside_len,num_vars,num_vals,agg_in,y,i):
+                #print(k,inside_len)
+                #print(i)
+                #for var_n,agg_e in enumerate(agg_in[-1]):
+                    #print(var_n+k*inside_len,num_vars*num_vals[-1]+k*inside_len,num_vars)
+                return [agg_fun(agg_e,y[var_n+k*inside_len:num_vars*num_vals[-1]+k*inside_len:num_vars],i) for var_n,agg_e in enumerate(agg_in[-1])]
+            def lambda_2(agg_in,num_vals,inside_len,y,i):
+                ans=[]
+                #print(i,int(i/prod_all[-1]),i%prod_all[-1])
+                
+                yy=sum([index_recurse(agg_in[:-1],num_vals[:-1],prod_all[:-1],inside_len,k,y,i%prod_all[-1]) for k in range(num_vals[-1])],[])
+                #print(yy)
+                for var_n,agg_e in enumerate(agg_in[-1]):
+                    ans.append(agg_fun(agg_e, yy[var_n::num_vars],int(i/prod_all[-1])))
+                return  ans
             num_vars=len(agg_in[-1])
             #print(num_vars)
             if len(num_vals)==1:
-                return lambda_1 (k,inside_len,num_vars,num_vals,agg_in)
+                return lambda_1 (k,inside_len,num_vars,num_vals,agg_in,y,i)
             inside_len=inside_len*num_vars*num_vals[-2]
-            return lambda_2(agg_in,num_vals,inside_len)
+            return lambda_2(agg_in,num_vals,inside_len,y,i)
         
         num_vars=len(agg_all[-1])
         prod_all=[index_value_len[0] for v in index_value_len]
-        for i,v in enumerate(index_value_len[1:]):
-            prod_all[i] = prod_all[i-1]*v
-        #prod_all.reverse()   
-        aa=index_recurse(agg_all,index_value_len,prod_all,1,0)
+        #print(index_value_len)
+        for ii,v in enumerate(index_value_len[1:]):
+            prod_all[ii] = prod_all[ii-1]*v
+        #print(prod_all)
+        #prod_all.reverse()
+        aa=index_recurse(agg_all,index_value_len,prod_all,1,0,y,i)
         
         #print(aa(list(range(27)),0))   
         return aa
@@ -342,7 +353,10 @@ Returns:
     #indexvalues = space.get_space()[0]['values']
     #index_values=list(itertools.product(*[pa['values'] for pa in reversed(space.get_space())]))
     index_values=list(itertools.product(*[list(range(len(pa['values']))) for pa in space.get_space()]))
+
     index_value_len=[len(pa['values']) for pa in space.get_space()]
+    index_value_len.reverse()
+    index_values=list(itertools.product(*[range(v) for v in index_value_len]))
     if 'advection' in space.get_space()[0]:
         advoper = space.get_space()[0]['advection']['implementation']
     else:
@@ -361,14 +375,14 @@ Returns:
     dynode=dynamics.get_processes('ODE')
     print([d['name'] for d in dynode])
     agg_all=[p['aggregators'] for p in dynode][0]
-    pprint.pprint(agg_all)
     #agg_all.reverse()
+    #pprint.pprint(agg_all)
     agg_all=list(zip(*agg_all))
     pprint.pprint(agg_all)
     print(len(dynode))
     #print(index_values)
     ode_procs= [lambda t,y,parms,i, k=k,p=p: \
-        p['implementation'](t,expand(agg_all[k],index_value_len)(y,i),parms) \
+        p['implementation'](t,expand(agg_all[k],index_value_len,y,i),parms) \
             for k, p in enumerate(dynode)]
  
     #
@@ -381,7 +395,7 @@ Returns:
     # repeat processes for all index values
     #
     print(index_values)
-    ode_procs_allv = lambda t, y : sum([ode_procs_sum(t,y,paramf(indexvalue),i) for (i,indexvalue) in enumerate(index_values)],[])
+    ode_procs_allv = lambda t, y : sum([ode_procs_sum(t,y,paramf(indexvalue),i) for i,indexvalue in enumerate(index_values)],[])
 
     #
     # Add advection

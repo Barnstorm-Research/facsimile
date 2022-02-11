@@ -73,7 +73,7 @@ def get_space_factor(nvalues=3,space=0):
         SIR_space.add_advection('Travel','Region',travel)
     return SIR_space
     '''
-    SIR_space.add_index('Region',['Metroton','Suburbium','Ruralia','Westcosta','Islandii'][:2])
+    SIR_space.add_index('Region',['Metroton','Suburbium','Ruralia','Westcosta','Islandii'][:3])
     SIR_space.add_advection('Travel','Region',travel)
 
     SIR_space.add_index('AgeGroup',['Young','Middle','Senior'][:2])
