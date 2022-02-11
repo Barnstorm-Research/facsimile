@@ -464,7 +464,11 @@ class Distribute_to_ABM(object):
 
         # Build state graph
         stateGraph = nx.DiGraph()
-        stateGraph.add_edges_from(list(range(list(dynamicsVars))))
+        stateGraph.add_nodes_from([var["name"] for var in dynamicsVars])
+        for proc in dynamicsProcs:
+            abmImpl = list(filter(lambda impl:impl["moc"]=="ABM",proc["implementations"]))[0]["function"]
+            stateGraph.add_edge(abmImpl.startState,abmImpl.endState,transition=abmImpl.apply)
+        # stateGraph.add_edges_from(list(range(len(dynamicsVars))))
         x = 10
 
 class Distribute_to_gillespie(gillespy2.Model):

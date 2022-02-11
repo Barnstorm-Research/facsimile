@@ -2,13 +2,14 @@
 an SIR epidemics model. These factors can be composed, modified, and rendered into
 executable modelsusing the tools of the FACSIMILE framework
 '''
+from abc import ABC, abstractmethod
 
 import simpy as spy
 import numpy as np
 
 from facsimile import framework as F
 from  facsimile import  fermi
-from typing import Iterator, List
+from typing import Iterator, List, Optional
 from dataclasses import dataclass
 
 ###
@@ -30,7 +31,7 @@ def get_ABM_dynamics_factor(npro=3):
     for varName in  ['S','I','R']:
         sir_df.add_variable(varName,['Region'])
 
-    for processABM in [infection_ABM]:
+    for processABM in [InfectionABMProc('S','I'),RecoveryABMProc('I','R')]:
         model_proc={}
         model_proc['name']=processABM.__name__
         model_proc['implementations']=[]
@@ -184,42 +185,51 @@ def reinfection(t,y,params=[1e-2,1e-3,1e-3]):
 
 # Agent-Based Model Implementation
 
-@dataclass
-class SIRABMParams:
+class ABMProcess(ABC):
     """
-    Parameters needed for SIR agent-based model
+    Describes a process for an agent based model.
     """
 
-    probInfection:float
-    timeToRecovery:float
+    def __init__(self,startState:chr,endState:chr,name:str):
+        self.startState = startState
+        self.endState = endState
+        self.name = name
 
-def recovery_ABM(y:List[float],params:List[float]) -> float:
-    """
-    The recovery "process" in an ABM is the probability that an agent recovers in the next time step.
-    :param y: Count of susceptible, infected, and recovered agents, in that order
-    :param params: probability of agent-agent interaction being infectious, recovery rate.
-    :return:
-    """
-    return params[1]
+    def nChooseK(self,n,k):
+        return np.math.factorial(n)*1./(np.math.factorial(k)*np.math.factorial(n-k)*1.)
 
-def infection_ABM(y:List[float],params:List[float]) -> float:
-    """
-    The infection "process" in an ABM is the probability that an agent becomes infected at the given time-step.
-    :param y: List of the count of susceptible agents, infected agents, and recovered agents "nearby"
-    :param params: The list of parameters: probability that single agent-agent interaction results in infection, recovery rate
-    :return: Probability that this agent will become infected
-    """
-    s,i,r = y
-    a,b = params
-    if i == 0:
-        return 0.0 # If there are no infected agents, then we cannot become infected
-    else:
+    @property
+    def __name__(self):
+        return self.name
+
+    @abstractmethod
+    def apply(self,y:List[float],params:List[float]) -> bool:
+        """
+        If true, then the process applies and the agent should transition to the endState.
+        :param y:
+        :param params:
+        :return:
+        """
+        pass
+
+class InfectionABMProc(ABMProcess):
+
+    def __init__(self,startState:chr,endState:chr): ABMProcess.__init__(self,startState,endState,"Infection")
+
+    def apply(self,y:List[float],params:List[float]) -> bool:
+        S,I,R = y
+        a,b = params
         totalProb = 0.0
-        fct = np.math.factorial
-        nChK = lambda n,k: fct(n)/(fct(k)*fct(n-k)) # n choose k
-        for numInfected in range(1,i+1):
-            totalProb += (a**numInfected)*((i-numInfected)**(1-a))*nChK(i,numInfected)
-        return totalProb
+        for numInfected in range(1,I+1):
+            totalProb += (a**numInfected)*((1-a)**(I-numInfected))*self.nChooseK(I,numInfected)
+        return np.random.choice(2,1,p=[totalProb,1-totalProb]) == 0
+
+class RecoveryABMProc(ABMProcess):
+
+    def __init__(self,startState:chr,endState:chr): ABMProcess.__init__(self,startState,endState,"Recovery")
+
+    def apply(self,y:List[float],params:List[float]) -> bool:
+        return np.random.choice(2,1,p=[params[1],1.-params[1]]) == 0
 
 # Translation of reference implementation
 
